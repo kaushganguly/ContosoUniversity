@@ -1,21 +1,16 @@
-using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Net;
-using System.Web.Mvc;
-using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 using ContosoUniversity.Models.SchoolViewModels;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ContosoUniversity.Controllers
 {
     public class InstructorsController : BaseController
     {
-        // GET: Instructors - All roles can view
-        public ActionResult Index(int? id, int? courseID)
+        public IActionResult Index(int? id, int? courseID)
         {
             var viewModel = new InstructorIndexData();
+            viewModel.Courses = Enumerable.Empty<Course>();
             viewModel.Instructors = db.Instructors
                 .Include(i => i.OfficeAssignment)
                 .Include(i => i.CourseAssignments)
@@ -25,92 +20,154 @@ namespace ContosoUniversity.Controllers
 
             if (id != null)
             {
-                ViewBag.InstructorID = id.Value;
-                viewModel.Courses = viewModel.Instructors.Where(
-                    i => i.ID == id.Value).Single().CourseAssignments.Select(s => s.Course);
+                var selectedInstructor = viewModel.Instructors.SingleOrDefault(i => i.ID == id.Value);
+                if (selectedInstructor != null)
+                {
+                    ViewBag.InstructorID = id.Value;
+                    viewModel.Courses = selectedInstructor.CourseAssignments.Select(s => s.Course);
+                }
             }
 
-            if (courseID != null)
+            if (courseID != null && id != null)
             {
-                ViewBag.CourseID = courseID.Value;
-                viewModel.Enrollments = viewModel.Courses.Where(
-                    x => x.CourseID == courseID).Single().Enrollments;
+                var selectedCourse = viewModel.Courses.SingleOrDefault(x => x.CourseID == courseID.Value);
+                if (selectedCourse != null)
+                {
+                    ViewBag.CourseID = courseID.Value;
+                    viewModel.Enrollments = selectedCourse.Enrollments;
+                }
             }
 
             return View(viewModel);
         }
 
-        // GET: Instructors/Details/5 - All roles can view details
-        public ActionResult Details(int? id)
+        public IActionResult Details(int? id)
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return BadRequest();
             }
-            Instructor instructor = db.Instructors.Find(id);
+
+            var instructor = db.Instructors.Find(id);
             if (instructor == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
+
             return View(instructor);
         }
 
-        // GET: Instructors/Create
-        public ActionResult Create()
+        public IActionResult Create()
         {
-            var instructor = new Instructor();
-            instructor.CourseAssignments = new List<CourseAssignment>();
+            var instructor = new Instructor { CourseAssignments = new List<CourseAssignment>() };
             PopulateAssignedCourseData(instructor);
             return View(instructor);
         }
 
-        // POST: Instructors/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "LastName,FirstMidName,HireDate,OfficeAssignment")] Instructor instructor, string[] selectedCourses)
+        public IActionResult Create([Bind("LastName,FirstMidName,HireDate,OfficeAssignment")] Instructor instructor, string[] selectedCourses)
         {
             if (selectedCourses != null)
             {
                 instructor.CourseAssignments = new List<CourseAssignment>();
                 foreach (var course in selectedCourses)
                 {
-                    var courseToAdd = new CourseAssignment { InstructorID = instructor.ID, CourseID = int.Parse(course) };
-                    instructor.CourseAssignments.Add(courseToAdd);
+                    instructor.CourseAssignments.Add(new CourseAssignment { InstructorID = instructor.ID, CourseID = int.Parse(course) });
                 }
             }
+
             if (ModelState.IsValid)
             {
                 db.Instructors.Add(instructor);
                 db.SaveChanges();
-                
-                // Send notification for instructor creation
                 SendEntityNotification("Instructor", instructor.ID.ToString(), EntityOperation.CREATE);
-                
                 return RedirectToAction("Index");
             }
+
             PopulateAssignedCourseData(instructor);
             return View(instructor);
         }
 
-        // GET: Instructors/Edit/5
-        public ActionResult Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return BadRequest();
             }
-            Instructor instructor = db.Instructors
+
+            var instructor = db.Instructors
                 .Include(i => i.OfficeAssignment)
                 .Include(i => i.CourseAssignments)
                     .ThenInclude(c => c.Course)
-                .Where(i => i.ID == id)
-                .Single();
-            PopulateAssignedCourseData(instructor);
+                .SingleOrDefault(i => i.ID == id);
+
             if (instructor == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
+
+            PopulateAssignedCourseData(instructor);
             return View(instructor);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int? id, [Bind("ID,LastName,FirstMidName,HireDate,OfficeAssignment")] Instructor formInstructor, string[] selectedCourses)
+        {
+            if (id == null)
+            {
+                return BadRequest();
+            }
+
+            var instructorToUpdate = db.Instructors
+               .Include(i => i.OfficeAssignment)
+               .Include(i => i.CourseAssignments)
+                   .ThenInclude(c => c.Course)
+               .SingleOrDefault(i => i.ID == id);
+
+            if (instructorToUpdate == null)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    instructorToUpdate.FirstMidName = formInstructor.FirstMidName;
+                    instructorToUpdate.LastName = formInstructor.LastName;
+                    instructorToUpdate.HireDate = formInstructor.HireDate;
+
+                    var location = formInstructor.OfficeAssignment?.Location;
+                    if (string.IsNullOrWhiteSpace(location))
+                    {
+                        instructorToUpdate.OfficeAssignment = null;
+                    }
+                    else
+                    {
+                        if (instructorToUpdate.OfficeAssignment == null)
+                        {
+                            instructorToUpdate.OfficeAssignment = new OfficeAssignment();
+                        }
+
+                        instructorToUpdate.OfficeAssignment.Location = location;
+                    }
+
+                    UpdateInstructorCourses(selectedCourses, instructorToUpdate);
+                    db.SaveChanges();
+
+                    SendEntityNotification("Instructor", instructorToUpdate.ID.ToString(), EntityOperation.UPDATE);
+                    return RedirectToAction("Index");
+                }
+                catch (Exception)
+                {
+                    ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator.");
+                }
+            }
+
+            PopulateAssignedCourseData(instructorToUpdate);
+            return View(instructorToUpdate);
         }
 
         private void PopulateAssignedCourseData(Instructor instructor)
@@ -130,50 +187,6 @@ namespace ContosoUniversity.Controllers
             ViewBag.Courses = viewModel;
         }
 
-        // POST: Instructors/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int? id, string[] selectedCourses)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            var instructorToUpdate = db.Instructors
-               .Include(i => i.OfficeAssignment)
-               .Include(i => i.CourseAssignments)
-                   .ThenInclude(c => c.Course)
-               .Where(i => i.ID == id)
-               .Single();
-
-            if (TryUpdateModel(instructorToUpdate, "",
-               new string[] { "LastName", "FirstMidName", "HireDate", "OfficeAssignment" }))
-            {
-                try
-                {
-                    if (String.IsNullOrWhiteSpace(instructorToUpdate.OfficeAssignment.Location))
-                    {
-                        instructorToUpdate.OfficeAssignment = null;
-                    }
-
-                    UpdateInstructorCourses(selectedCourses, instructorToUpdate);
-
-                    db.SaveChanges();
-                    
-                    // Send notification for instructor update
-                    SendEntityNotification("Instructor", instructorToUpdate.ID.ToString(), EntityOperation.UPDATE);
-
-                    return RedirectToAction("Index");
-                }
-                catch (Exception)
-                {
-                    ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists, see your system administrator.");
-                }
-            }
-            PopulateAssignedCourseData(instructorToUpdate);
-            return View(instructorToUpdate);
-        }
-
         private void UpdateInstructorCourses(string[] selectedCourses, Instructor instructorToUpdate)
         {
             if (selectedCourses == null)
@@ -183,8 +196,7 @@ namespace ContosoUniversity.Controllers
             }
 
             var selectedCoursesHS = new HashSet<string>(selectedCourses);
-            var instructorCourses = new HashSet<int>
-                (instructorToUpdate.CourseAssignments.Select(c => c.Course.CourseID));
+            var instructorCourses = new HashSet<int>(instructorToUpdate.CourseAssignments.Select(c => c.Course.CourseID));
             foreach (var course in db.Courses)
             {
                 if (selectedCoursesHS.Contains(course.CourseID.ToString()))
@@ -194,68 +206,55 @@ namespace ContosoUniversity.Controllers
                         instructorToUpdate.CourseAssignments.Add(new CourseAssignment { InstructorID = instructorToUpdate.ID, CourseID = course.CourseID });
                     }
                 }
-                else
+                else if (instructorCourses.Contains(course.CourseID))
                 {
-
-                    if (instructorCourses.Contains(course.CourseID))
-                    {
-                        CourseAssignment courseToRemove = instructorToUpdate.CourseAssignments.SingleOrDefault(i => i.CourseID == course.CourseID);
-                        db.Entry(courseToRemove).State = EntityState.Deleted;
-                    }
+                    var courseToRemove = instructorToUpdate.CourseAssignments.SingleOrDefault(i => i.CourseID == course.CourseID);
+                    db.Entry(courseToRemove).State = EntityState.Deleted;
                 }
             }
         }
 
-        // GET: Instructors/Delete/5
-        public ActionResult Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                return BadRequest();
             }
-            Instructor instructor = db.Instructors.Find(id);
+
+            var instructor = db.Instructors.Find(id);
             if (instructor == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
+
             return View(instructor);
         }
 
-        // POST: Instructors/Delete/5 - Only admins can delete instructors
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            Instructor instructor = db.Instructors
+            var instructor = db.Instructors
               .Include(i => i.OfficeAssignment)
-              .Where(i => i.ID == id)
-              .Single();
+              .SingleOrDefault(i => i.ID == id);
+
+            if (instructor == null)
+            {
+                return NotFound();
+            }
 
             db.Instructors.Remove(instructor);
 
-            var department = db.Departments
-                .Where(d => d.InstructorID == id)
-                .SingleOrDefault();
+            var department = db.Departments.SingleOrDefault(d => d.InstructorID == id);
             if (department != null)
             {
                 department.InstructorID = null;
             }
 
             db.SaveChanges();
-            
-            // Send notification for instructor deletion
             SendEntityNotification("Instructor", id.ToString(), EntityOperation.DELETE);
-            
-            return RedirectToAction("Index");
-        }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
+            return RedirectToAction("Index");
         }
     }
 }
