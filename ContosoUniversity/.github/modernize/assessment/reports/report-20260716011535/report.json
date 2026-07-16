@@ -1,0 +1,214 @@
+{
+  "metadata": {
+    "analysisStartTime": "2026-07-16T01:15:35Z",
+    "version": "1.0.1127",
+    "target": "Any"
+  },
+  "rules": {
+    "MSQUEUECOMPAT001": {
+      "title": "MSMQ (System.Messaging) not supported in cloud",
+      "severity": "mandatory",
+      "effort": 13,
+      "labels": ["domain=cloud-readiness"],
+      "description": "System.Messaging (MSMQ) is a Windows-only messaging technology that is not available in Azure App Service or containerized deployments. Replace with Azure Service Bus, Azure Queue Storage, or another cloud-native messaging solution."
+    },
+    "SERVERMAPPATH001": {
+      "title": "Server.MapPath not available in cloud hosting",
+      "severity": "mandatory",
+      "effort": 5,
+      "labels": ["domain=cloud-readiness"],
+      "description": "Server.MapPath resolves physical file paths on the server and is not supported outside of IIS/ASP.NET classic. Use IHostingEnvironment.WebRootPath or IWebHostEnvironment.ContentRootPath in ASP.NET Core, or store files in Azure Blob Storage."
+    },
+    "HTTPPOSTEDFILE001": {
+      "title": "HttpPostedFileBase file upload requires migration",
+      "severity": "mandatory",
+      "effort": 8,
+      "labels": ["domain=cloud-readiness"],
+      "description": "HttpPostedFileBase is a System.Web type that is not available outside of ASP.NET on .NET Framework. Migrate to IFormFile (ASP.NET Core) and store uploaded files in Azure Blob Storage or a persistent volume."
+    },
+    "SYSCONFIGMGR001": {
+      "title": "System.Configuration.ConfigurationManager usage",
+      "severity": "potential",
+      "effort": 5,
+      "labels": ["domain=cloud-readiness"],
+      "description": "ConfigurationManager reads from Web.config/App.config files. In cloud deployments, configuration should be externalized to environment variables, Azure App Configuration, or Key Vault."
+    },
+    "WEBCONFIG001": {
+      "title": "Web.config-based configuration not supported in cloud",
+      "severity": "mandatory",
+      "effort": 8,
+      "labels": ["domain=cloud-readiness"],
+      "description": "Web.config is an IIS-specific configuration mechanism. Migrate configuration to appsettings.json, environment variables, or Azure App Configuration for cloud deployments."
+    },
+    "LOCALDB001": {
+      "title": "LocalDB connection string not suitable for cloud",
+      "severity": "potential",
+      "effort": 3,
+      "labels": ["domain=cloud-readiness"],
+      "description": "The connection string references SQL Server LocalDB which is a development-only database. Replace with a cloud-accessible SQL Server or Azure SQL Database connection string managed through environment variables or Key Vault."
+    },
+    "LEGACYFRAMEWORK001": {
+      "title": "Legacy ASP.NET MVC 5 on .NET Framework 4.8",
+      "severity": "mandatory",
+      "effort": 40,
+      "labels": ["domain=cloud-readiness"],
+      "description": "The project targets .NET Framework 4.8 using ASP.NET MVC 5. Migrate to ASP.NET Core on .NET 8 or later to benefit from cross-platform support, improved performance, and cloud-native features."
+    },
+    "PACKAGESCFG001": {
+      "title": "Legacy packages.config format",
+      "severity": "potential",
+      "effort": 3,
+      "labels": ["domain=cloud-readiness"],
+      "description": "The project uses the legacy packages.config format for NuGet references. Migrate to PackageReference format in the .csproj file for better dependency management and compatibility with the .NET SDK."
+    },
+    "GLOBALASAX001": {
+      "title": "Global.asax application lifecycle not available",
+      "severity": "mandatory",
+      "effort": 5,
+      "labels": ["domain=cloud-readiness"],
+      "description": "Global.asax is an IIS/ASP.NET-specific application lifecycle handler. Migrate startup logic to Program.cs and Startup.cs in ASP.NET Core using the middleware pipeline and hosted services."
+    },
+    "IISEXPRESS001": {
+      "title": "IIS-specific hosting configuration",
+      "severity": "potential",
+      "effort": 3,
+      "labels": ["domain=cloud-readiness"],
+      "description": "The project is configured for IIS/IIS Express hosting (ProjectTypeGuids reference IIS). Cloud deployments typically use Kestrel or Docker containers. Remove IIS-specific project type GUIDs and configure for cross-platform hosting."
+    }
+  },
+  "projects": [
+    {
+      "properties": {
+        "repo": "ContosoUniversity",
+        "appName": "ContosoUniversity",
+        "languages": [".NET C#"],
+        "frameworks": ["ASP.NET MVC 5.2.9", ".NET Framework 4.8", "Entity Framework Core 3.1.32"],
+        "tools": ["MSBuild", "NuGet packages.config"],
+        "applicationType": "Web Application",
+        "description": "University management web application for courses, students, instructors, and departments",
+        "linesOfCode": "2800"
+      },
+      "incidents": [
+        {
+          "ruleId": "MSQUEUECOMPAT001",
+          "location": "ContosoUniversity/Services/NotificationService.cs",
+          "line": 1
+        },
+        {
+          "ruleId": "MSQUEUECOMPAT001",
+          "location": "ContosoUniversity/Services/NotificationService.cs",
+          "line": 18
+        },
+        {
+          "ruleId": "MSQUEUECOMPAT001",
+          "location": "ContosoUniversity/Services/NotificationService.cs",
+          "line": 27
+        },
+        {
+          "ruleId": "SERVERMAPPATH001",
+          "location": "ContosoUniversity/Controllers/CoursesController.cs",
+          "line": 65,
+          "targets": {
+            "aks": { "effort": 5 }
+          }
+        },
+        {
+          "ruleId": "HTTPPOSTEDFILE001",
+          "location": "ContosoUniversity/Controllers/CoursesController.cs",
+          "line": 35,
+          "targets": {
+            "aks": { "effort": 8 }
+          }
+        },
+        {
+          "ruleId": "HTTPPOSTEDFILE001",
+          "location": "ContosoUniversity/Controllers/CoursesController.cs",
+          "line": 95
+        },
+        {
+          "ruleId": "SYSCONFIGMGR001",
+          "location": "ContosoUniversity/Data/SchoolContextFactory.cs",
+          "line": 10
+        },
+        {
+          "ruleId": "SYSCONFIGMGR001",
+          "location": "ContosoUniversity/Services/NotificationService.cs",
+          "line": 14
+        },
+        {
+          "ruleId": "WEBCONFIG001",
+          "location": "ContosoUniversity/Web.config",
+          "line": 1
+        },
+        {
+          "ruleId": "LOCALDB001",
+          "location": "ContosoUniversity/Web.config",
+          "line": 8
+        },
+        {
+          "ruleId": "LEGACYFRAMEWORK001",
+          "location": "ContosoUniversity/ContosoUniversity.csproj",
+          "line": 10
+        },
+        {
+          "ruleId": "PACKAGESCFG001",
+          "location": "ContosoUniversity/packages.config",
+          "line": 1
+        },
+        {
+          "ruleId": "GLOBALASAX001",
+          "location": "ContosoUniversity/Global.asax",
+          "line": 1
+        },
+        {
+          "ruleId": "IISEXPRESS001",
+          "location": "ContosoUniversity/ContosoUniversity.csproj",
+          "line": 13
+        }
+      ]
+    }
+  ],
+  "security": [
+    {
+      "id": "SEC-001",
+      "title": "No authentication or authorization implemented",
+      "severity": "mandatory",
+      "storyPoint": 13,
+      "description": "The application has no authentication or authorization mechanisms. All controllers and actions are publicly accessible. Implement ASP.NET Core Identity or Azure AD authentication before cloud deployment.",
+      "evidence": {
+        "files": [
+          "ContosoUniversity/Controllers/BaseController.cs",
+          "ContosoUniversity/Controllers/StudentsController.cs",
+          "ContosoUniversity/Controllers/CoursesController.cs",
+          "ContosoUniversity/Controllers/InstructorsController.cs",
+          "ContosoUniversity/Controllers/DepartmentsController.cs"
+        ]
+      }
+    },
+    {
+      "id": "SEC-002",
+      "title": "File upload without path traversal protection",
+      "severity": "potential",
+      "storyPoint": 5,
+      "description": "The CoursesController uploads files to a server path constructed from user input. While file extension validation exists, there is no defense against path traversal attacks. Use a safe file storage approach (Azure Blob Storage) with server-generated filenames.",
+      "evidence": {
+        "files": [
+          "ContosoUniversity/Controllers/CoursesController.cs"
+        ]
+      }
+    },
+    {
+      "id": "SEC-003",
+      "title": "MSMQ queue permissions set to Everyone/FullControl",
+      "severity": "potential",
+      "storyPoint": 3,
+      "description": "The NotificationService grants FullControl permissions on the MSMQ queue to 'Everyone'. This is overly permissive and should be restricted to the application's service account.",
+      "evidence": {
+        "files": [
+          "ContosoUniversity/Services/NotificationService.cs"
+        ]
+      }
+    }
+  ],
+  "rearchitect": []
+}
