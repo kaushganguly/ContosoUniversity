@@ -168,6 +168,12 @@ namespace ContosoUniversity.Controllers
                 return false;
             }
 
+            if (!HasSupportedImageSignature(teachingMaterialImage, fileExtension))
+            {
+                ModelState.AddModelError("teachingMaterialImage", "The uploaded file content does not match a supported image format.");
+                return false;
+            }
+
             try
             {
                 var uploadsPath = MapPath("~/Uploads/TeachingMaterials/");
@@ -191,6 +197,22 @@ namespace ContosoUniversity.Controllers
                 ModelState.AddModelError("teachingMaterialImage", "Error uploading file: " + ex.Message);
                 return false;
             }
+        }
+
+        private static bool HasSupportedImageSignature(IFormFile file, string fileExtension)
+        {
+            using var stream = file.OpenReadStream();
+            Span<byte> header = stackalloc byte[8];
+            var bytesRead = stream.Read(header);
+
+            return fileExtension switch
+            {
+                ".jpg" or ".jpeg" => bytesRead >= 3 && header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF,
+                ".png" => bytesRead >= 8 && header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47 && header[4] == 0x0D && header[5] == 0x0A && header[6] == 0x1A && header[7] == 0x0A,
+                ".gif" => bytesRead >= 4 && header[0] == 0x47 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x38,
+                ".bmp" => bytesRead >= 2 && header[0] == 0x42 && header[1] == 0x4D,
+                _ => false
+            };
         }
 
         private void DeleteTeachingMaterial(string teachingMaterialImagePath)

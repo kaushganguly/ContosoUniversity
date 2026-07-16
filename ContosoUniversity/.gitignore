@@ -26,3 +26,5 @@ Uploads/web.config
 *.ldf
 App_Data/*.mdf
 App_Data/*.ldf
+# Local SQLite database
+ContosoUniversity.db

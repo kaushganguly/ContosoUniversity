@@ -14,7 +14,13 @@
         "generateNewUnitTests": "false",
         "passUnitTests": "true"
       },
-      "status": "started"
+      "status": "success",
+      "taskSummary": "Converted the application to ASP.NET Core MVC on net10.0, migrated configuration to appsettings.json, updated EF Core to SQLite for cross-platform local execution, replaced MSMQ with an in-memory notification queue, and validated build/test/smoke execution.",
+      "successCriteriaStatus": {
+        "passBuild": "true",
+        "generateNewUnitTests": "true",
+        "passUnitTests": "true"
+      }
     }
   ],
   "metadata": {
