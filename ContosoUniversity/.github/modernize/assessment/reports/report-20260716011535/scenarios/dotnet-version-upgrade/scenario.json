@@ -1,0 +1,7 @@
+{
+  "scenarioId": "dotnet-version-upgrade",
+  "description": "Upgrade assessment for ContosoUniversity.sln",
+  "targetFramework": "net10.0",
+  "status": "completed",
+  "assessmentDate": "2026-07-16T01:15:35Z"
+}

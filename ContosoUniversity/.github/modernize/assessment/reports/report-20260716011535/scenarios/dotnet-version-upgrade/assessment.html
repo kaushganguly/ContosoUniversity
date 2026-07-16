@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>DotNET Upgrade Assessment</title>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({ startOnLoad: true, theme: 'default', flowchart: { useMaxWidth: true }, sequence: { useMaxWidth: true } });
+</script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 2rem auto; max-width: 1200px; padding: 0 1.5rem; line-height: 1.6; color: #1f2937; }
+  h1, h2, h3, h4 { margin-top: 1.5em; }
+  .table-wrap { overflow-x: auto; margin: 1em 0; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+  th, td { border: 1px solid #d1d5db; padding: 0.5em 0.75em; text-align: left; word-break: break-word; }
+  td:first-child { min-width: 120px; }
+  th { background: #f3f4f6; }
+  code { background: #f3f4f6; padding: 0.15em 0.3em; border-radius: 3px; font-size: 0.9em; }
+  pre { background: #1e1e1e; color: #d4d4d4; padding: 1em; border-radius: 6px; overflow-x: auto; }
+  a { color: #2563eb; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .back-link { display: block; margin-bottom: 1.5em; color: #6b7280; font-size: 0.9em; }
+</style>
+</head>
+<body>
+<a class="back-link" href="../../report.html">&larr; Back to Report</a>
+<h1 id="net-upgrade-assessment-contosouniversity-net10-0">.NET Upgrade Assessment: ContosoUniversity → net10.0</h1>
+<p><strong>Source:</strong> .NET Framework 4.8 (ASP.NET MVC 5)  </p>
+<p><strong>Target:</strong> .NET 10.0 (ASP.NET Core)  </p>
+<p><strong>Assessment Date:</strong> 2026-07-16</p>
+<h2 id="summary">Summary</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Severity</th><th>Count</th>
+</tr></thead><tbody>
+<tr><td>Mandatory</td><td>8</td></tr>
+<tr><td>Potential</td><td>3</td></tr>
+<tr><td>Optional</td><td>1</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>12</strong></td></tr>
+</tbody></table></div>
+<h2 id="mandatory-issues-blockers">Mandatory Issues (Blockers)</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Issue</th><th>Effort (hrs)</th><th>Affected Files</th>
+</tr></thead><tbody>
+<tr><td>ASP.NET MVC 5 (System.Web) requires migration to ASP.NET Core MVC</td><td>40</td><td>6 controllers</td></tr>
+<tr><td>System.Web namespace not available in .NET 10</td><td>20</td><td>CoursesController, StudentsController, Global.asax.cs</td></tr>
+<tr><td>Global.asax application lifecycle must be migrated</td><td>5</td><td>Global.asax, Global.asax.cs</td></tr>
+<tr><td>System.Configuration.ConfigurationManager not available</td><td>5</td><td>SchoolContextFactory, Global.asax.cs, NotificationService</td></tr>
+<tr><td>System.Web.Optimization (bundling) not supported</td><td>3</td><td>BundleConfig.cs</td></tr>
+<tr><td>System.Messaging (MSMQ) not available in .NET 10</td><td>13</td><td>NotificationService.cs</td></tr>
+<tr><td>Entity Framework Core 3.1 must be upgraded to EF Core 9+</td><td>8</td><td>ContosoUniversity.csproj</td></tr>
+<tr><td>Legacy .csproj format (non-SDK style) must be converted</td><td>5</td><td>ContosoUniversity.csproj</td></tr>
+</tbody></table></div>
+<h2 id="potential-issues">Potential Issues</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Issue</th><th>Effort (hrs)</th><th>Affected Files</th>
+</tr></thead><tbody>
+<tr><td>Razor views need migration from MVC 5 Razor to ASP.NET Core Razor</td><td>13</td><td>Views/<em>*/</em>.cshtml</td></tr>
+<tr><td>packages.config must be migrated to PackageReference</td><td>3</td><td>packages.config</td></tr>
+<tr><td>Microsoft.Data.SqlClient upgrade required</td><td>2</td><td>packages.config</td></tr>
+</tbody></table></div>
+<h2 id="optional-issues">Optional Issues</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Issue</th><th>Effort (hrs)</th><th>Affected Files</th>
+</tr></thead><tbody>
+<tr><td>Newtonsoft.Json can be replaced with System.Text.Json</td><td>5</td><td>packages.config, NotificationService.cs</td></tr>
+</tbody></table></div>
+<h2 id="estimated-total-migration-effort">Estimated Total Migration Effort</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Category</th><th>Hours</th>
+</tr></thead><tbody>
+<tr><td>Mandatory blockers</td><td>~99</td></tr>
+<tr><td>Potential issues</td><td>~18</td></tr>
+<tr><td>Optional improvements</td><td>~5</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>~122</strong></td></tr>
+</tbody></table></div>
+<h2 id="recommended-migration-path">Recommended Migration Path</h2>
+<ol>
+<li><strong>Convert to SDK-style project</strong> using the <code>sdk-style-conversion</code> scenario</li>
+<li><strong>Migrate to ASP.NET Core</strong> — rewrite controllers, views, and startup using ASP.NET Core 10 patterns</li>
+<li><strong>Replace System.Web types</strong> — <code>HttpPostedFileBase</code> → <code>IFormFile</code>, <code>Server.MapPath</code> → <code>IWebHostEnvironment.WebRootPath</code>, <code>HttpContext.Current</code> → injected <code>IHttpContextAccessor</code></li>
+<li><strong>Replace ConfigurationManager</strong> with <code>IConfiguration</code> and <code>appsettings.json</code></li>
+<li><strong>Upgrade EF Core</strong> from 3.1 to 9.0+ — update DbContext, migrations, and provider packages</li>
+<li><strong>Replace MSMQ</strong> with Azure Service Bus or Azure Queue Storage</li>
+<li><strong>Migrate bundles</strong> to libman or npm for static assets</li>
+<li><strong>Update packages.config</strong> to PackageReference format</li>
+</ol>
+</body>
+</html>
