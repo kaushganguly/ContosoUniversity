@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Azure/appcat/main/src/appcat/report/report.schema.json",
+  "metadata": {
+    "analysisStartTime": "2026-07-16T00:23:24Z",
+    "analysisEndTime": "2026-07-16T00:23:24Z",
+    "source": "Solution",
+    "target": "Any",
+    "targetIds": ["aks"],
+    "targetDisplayNames": ["AKS"]
+  },
+  "rules": {},
+  "projects": [
+    {
+      "properties": {
+        "repo": "ContosoUniversity",
+        "appName": "ContosoUniversity",
+        "languages": ["C#", ".NET"],
+        "frameworks": ["ASP.NET MVC 5", ".NET Framework 4.8"],
+        "tools": ["NuGet", "MSBuild"]
+      },
+      "incidents": []
+    }
+  ],
+  "security": [],
+  "rearchitect": []
+}
