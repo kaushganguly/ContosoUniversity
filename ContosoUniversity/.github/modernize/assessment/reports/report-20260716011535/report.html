@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Assessment - ContosoUniversity</title>
+<style>
+:root {
+  --bg-primary: #ffffff;
+  --bg-card: #f8f9fa;
+  --bg-page: #f0f1f3;
+  --text-primary: #24292f;
+  --text-secondary: #57606a;
+  --text-muted: #6b7280;
+  --border-color: #d0d7de;
+  --border-light: #e1e4e8;
+  --link-color: #2563eb;
+  --color-mandatory: #E3008C;
+  --color-potential: #637CEF;
+  --color-optional: #A19F9D;
+  --font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  --font-mono: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-family); font-size: 13px; color: var(--text-primary); background: var(--bg-primary); line-height: 1.5; margin: 0; padding: 0; }
+a { color: var(--link-color); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Page layout ───────────────────────────────────────────── */
+.main { margin: 0; padding: 24px 32px; background: var(--bg-primary); }
+.back-link { color: var(--text-muted); font-size: 13px; margin-bottom: 16px; display: block; }
+h1 { font-weight: 600; font-size: 20px; color: var(--text-primary); margin-bottom: 20px; }
+
+/* ── Report cards (matches VS Code .vscode-report-card) ──── */
+.report-card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 4px; padding: 12px; margin-bottom: 20px; }
+.report-card h2 { font-size: 14px; font-weight: 600; margin: 0; color: var(--text-primary); }
+.report-card-body { margin-top: 16px; }
+
+/* ── Component Information (two-column) ────────────────── */
+.app-info-container { display: flex; gap: 8px; flex-wrap: wrap; }
+.app-info-column { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 8px; }
+.app-info-row { display: flex; align-items: baseline; }
+.app-info-label { width: 136px; flex-shrink: 0; font-weight: 600; color: var(--text-primary); }
+.app-info-value { flex: 1; color: var(--text-primary); }
+
+/* ── Issue Summary (pie charts + legend) ─────────────────── */
+.cards-container { display: flex; align-items: stretch; gap: 20px; flex-wrap: wrap; }
+.issue-summary-card { flex: 2; }
+.domain-summary-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-around; }
+.domain-summary-item { flex: 1; min-width: 120px; text-align: center; padding: 0 16px; border-right: 1px solid var(--border-light); }
+.domain-summary-item:last-child { border-right: none; }
+.domain-summary-item h3 { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-top: 8px; }
+.domain-summary-item .count { font-size: 12px; color: var(--text-secondary); }
+.criticality-legend { display: flex; flex-wrap: wrap; gap: 15px; padding-top: 12px; justify-content: center; }
+.criticality-legend .legend-item { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-secondary); }
+.legend-swatch { display: inline-block; width: 1em; height: 1em; border-radius: 2px; }
+
+/* ── Issue list tables ───────────────────────────────────── */
+.issue-section { margin-top: 20px; }
+.issue-section h2 { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+.issue-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 600px; }
+.issue-table th { text-align: left; text-transform: uppercase; font-weight: 600; font-size: calc(13px * 0.875); padding: 6px 8px; background: var(--bg-card); border-bottom: 1px solid var(--border-color); color: var(--text-secondary); position: sticky; top: 0; z-index: 1; }
+.issue-table td { padding: 12px 8px; border-bottom: 1px solid var(--border-light); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
+.col-issue { width: 55%; }
+.col-criticality { width: 25%; }
+.col-storypoint { width: 20%; }
+
+/* ── Target dropdown ─────────────────────────────────────── */
+.target-select-container { margin: 4px 0 16px 0; display: flex; align-items: center; gap: 8px; }
+.target-select-container label { font-weight: 600; color: var(--text-primary); font-size: 14px; }
+.target-select-container select { font-family: var(--font-family); font-size: 13px; padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary); cursor: pointer; }
+
+/* ── Filter bar ──────────────────────────────────────────── */
+.filter-bar { display: flex; flex-wrap: wrap; gap: 16px; margin: 16px 0 8px 0; align-items: center; }
+.multi-select { position: relative; display: inline-block; min-width: 140px; }
+.multi-select-btn { font-family: var(--font-family); font-size: 13px; padding: 4px 24px 4px 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary); cursor: pointer; width: 100%; text-align: left; position: relative; white-space: nowrap; }
+.multi-select-btn::after { content: '\25BE'; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--text-secondary); }
+.multi-select-dropdown { display: none; position: absolute; top: 100%; left: 0; min-width: 100%; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 100; margin-top: 2px; }
+.multi-select.open .multi-select-dropdown { display: block; }
+.multi-select-option { display: flex; align-items: center; gap: 6px; padding: 5px 10px; cursor: pointer; font-size: 13px; white-space: nowrap; }
+.multi-select-option:hover { background: var(--bg-secondary); }
+.multi-select-option input[type=checkbox] { margin: 0; cursor: pointer; }
+.clear-filters { font-size: 12px; color: var(--link-color); cursor: pointer; margin-left: 4px; }
+
+/* ── Criticality labels (colored square + text) ──────────── */
+.crit-label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; white-space: nowrap; }
+.crit-square { display: inline-block; width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.crit-square-mandatory { background: var(--color-mandatory); }
+.crit-square-potential { background: var(--color-potential); }
+.crit-square-optional { background: var(--color-optional); }
+
+/* ── Expandable rows ─────────────────────────────────────── */
+.expand-btn { background: none; border: none; cursor: pointer; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 11px; transition: transform 0.15s; padding: 0; vertical-align: middle; flex-shrink: 0; }
+.expand-btn.open { transform: rotate(90deg); }
+.issue-title-cell { display: flex; align-items: center; gap: 4px; }
+.detail-row td { padding: 0; border-bottom: 1px solid var(--border-light); white-space: normal; overflow: visible; text-overflow: clip; }
+.detail-content { display: flex; gap: 0; padding: 8px 8px 8px 32px; min-width: 0; }
+.file-list { flex: 0 0 50%; min-width: 0; overflow: hidden; }
+.file-list table { width: 100%; border-collapse: collapse; }
+.file-list th { font-size: calc(13px * 0.875); text-transform: uppercase; font-weight: 600; color: var(--text-secondary); padding: 6px 8px; border-bottom: 1px solid var(--border-color); text-align: left; height: 32px; }
+.file-list td { font-size: 13px; padding: 6px 8px; border-bottom: 1px solid var(--border-light); color: var(--text-primary); }
+.file-list .file-path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px; display: block; }
+.file-list .position { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+.explanation-panel { flex: 1; padding-left: 16px; min-width: 0; overflow-wrap: break-word; word-wrap: break-word; }
+.explanation-panel h4 { font-size: calc(13px * 0.875); text-transform: uppercase; font-weight: 600; color: var(--text-secondary); padding: 6px 0; border-bottom: 1px solid var(--border-color); height: 32px; margin: 0; }
+.explanation-panel p { font-size: 13px; padding: 8px 0; color: var(--text-primary); line-height: 1.6; white-space: normal; word-break: break-word; }
+
+/* ── Experimental badge ──────────────────────────────────── */
+.badge-experimental { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: #fef9c3; color: #854d0e; vertical-align: middle; margin-left: 8px; cursor: default; }
+
+/* ── Footer ──────────────────────────────────────────────── */
+.footer { text-align: center; margin-top: 24px; color: var(--text-muted); font-size: 13px; }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 800px) {
+  .main { padding: 16px; }
+  .app-info-container { flex-direction: column; }
+  .domain-summary-container { flex-direction: column; }
+  .domain-summary-item { border-right: none; border-bottom: 1px solid var(--border-light); padding-bottom: 12px; }
+  .detail-content { flex-direction: column; }
+  .file-list { flex: none; width: 100%; }
+  .explanation-panel { padding-left: 0; padding-top: 8px; }
+}
+/* ── Tab navigation ──────────────────────────────────────── */
+.tab-nav { display: flex; gap: 0; border-bottom: 1px solid var(--border-color); margin-bottom: 28px; flex-wrap: wrap; }
+.tab-btn { background: none; border: none; border-bottom: 2px solid transparent; padding: 10px 18px; font-size: 13px; font-family: var(--font-family); color: var(--text-secondary); cursor: pointer; margin-bottom: -1px; white-space: nowrap; position: relative; }
+.tab-btn:hover { color: var(--text-primary); }
+.tab-btn.active { color: var(--link-color); border-bottom-color: var(--link-color); font-weight: 600; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── Tooltip on tab ──────────────────────────────────────── */
+.tab-btn[data-tooltip]::after { content: attr(data-tooltip); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #24292f; color: #ffffff; font-size: 12px; font-weight: 400; padding: 6px 10px; border-radius: 4px; white-space: normal; width: max-content; max-width: 260px; text-align: center; pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 100; }
+.tab-btn[data-tooltip]:hover::after { opacity: 1; }
+
+/* ── Fact content — prose column ─────────────────────────── */
+.fact-content { max-width: 860px; margin: 0 auto; line-height: 1.75; color: var(--text-primary); font-size: 14px; }
+.fact-content h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px 0; color: var(--text-primary); letter-spacing: -0.01em; }
+.fact-content h1 + p { margin-top: 6px; color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; }
+.fact-content h2 { font-size: 17px; font-weight: 700; margin: 36px 0 12px 0; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); color: var(--text-primary); letter-spacing: -0.01em; }
+.fact-content h3 { font-size: 14px; font-weight: 700; margin: 24px 0 8px 0; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.04em; font-size: 12px; color: var(--text-secondary); }
+.fact-content p { margin: 10px 0; color: var(--text-primary); }
+.fact-content ul, .fact-content ol { margin: 10px 0 10px 22px; }
+.fact-content li { margin: 5px 0; }
+.fact-content a { color: var(--link-color); }
+.fact-content a:hover { text-decoration: underline; }
+
+/* ── Fact tables ─────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+.fact-content table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 13px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border-color); }
+.fact-content thead { background: var(--bg-card); }
+.fact-content th { text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; padding: 8px 14px; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); }
+.fact-content td { padding: 9px 14px; border-bottom: 1px solid var(--border-light); vertical-align: top; color: var(--text-primary); }
+.fact-content tr:last-child td { border-bottom: none; }
+.fact-content tbody tr:hover { background: #f6f8fa; }
+
+/* ── Fact code ───────────────────────────────────────────── */
+.fact-content code { font-family: var(--font-mono); font-size: 12px; background: #f0f1f3; padding: 2px 6px; border-radius: 4px; color: #c7254e; }
+.fact-content pre { background: #f6f8fa; border: 1px solid var(--border-light); border-radius: 6px; padding: 14px 16px; overflow-x: auto; margin: 14px 0; }
+.fact-content pre code { background: none; color: var(--text-primary); padding: 0; border-radius: 0; }
+.fact-content hr { border: none; border-top: 1px solid var(--border-light); margin: 28px 0; }
+.fact-content strong { font-weight: 600; }
+.fact-content em { font-style: italic; }
+.fact-content blockquote { border-left: 3px solid var(--border-color); margin: 12px 0; padding: 4px 16px; color: var(--text-secondary); }
+.fact-unavailable { padding: 32px 0; }
+.fact-unavailable h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); text-transform: none; letter-spacing: 0; margin: 0 0 12px 0; }
+.fact-unavailable p { margin: 0 0 8px 0; color: var(--text-secondary); }
+.fact-unavailable ol, .fact-unavailable ul { margin: 0 0 0 22px; color: var(--text-primary); }
+.fact-unavailable li { margin: 6px 0; }
+
+/* ── Mermaid diagram card ─────────────────────────────────── */
+.mermaid { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; padding: 24px 16px; margin: 20px 0; overflow-x: auto; text-align: center; cursor: pointer; position: relative; }
+.mermaid:hover { border-color: var(--border-color); }
+.mermaid svg { max-width: 100%; height: auto !important; display: inline-block; }
+.mermaid-zoom-hint { position: absolute; top: 8px; right: 10px; font-size: 11px; color: var(--text-muted); opacity: 0; transition: opacity 0.15s; pointer-events: none; }
+.mermaid:hover .mermaid-zoom-hint { opacity: 1; }
+
+/* ── Diagram lightbox ────────────────────────────────────── */
+.diagram-lightbox { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); align-items: center; justify-content: center; cursor: zoom-out; padding: 48px 32px; }
+.diagram-lightbox.open { display: flex; }
+.diagram-lightbox-inner { background: #ffffff; border-radius: 10px; padding: 32px; width: 88vw; max-height: 88vh; overflow: hidden; cursor: default; box-shadow: 0 24px 64px rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; }
+.diagram-lightbox-inner svg { width: 100% !important; height: auto !important; max-height: 76vh; display: block; }
+.diagram-lightbox-close { position: fixed; top: 20px; right: 24px; background: #ffffff; border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-primary); box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 1001; }
+.diagram-lightbox-close:hover { background: var(--bg-card); }
+.diagram-lightbox-hint { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.55); color: #ffffff; font-size: 12px; padding: 6px 14px; border-radius: 20px; pointer-events: none; white-space: nowrap; z-index: 1001; }
+</style>
+<script>
+window.__mermaidPending = [];
+window.__mermaidReady = false;
+window.__renderMermaidIn = function(container) {
+  if (container) { window.__mermaidPending.push(container); }
+};
+</script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({ startOnLoad: false, theme: 'default', flowchart: { useMaxWidth: true }, sequence: { useMaxWidth: true } });
+
+window.__renderMermaidIn = function(container) {
+  var nodes = container ? container.querySelectorAll('.mermaid:not([data-processed])') : [];
+  if (nodes.length > 0) {
+    mermaid.run({ nodes: Array.from(nodes) }).then(function() {
+      nodes.forEach(function(node) {
+        if (!node.querySelector('.mermaid-zoom-hint')) {
+          var hint = document.createElement('span');
+          hint.className = 'mermaid-zoom-hint';
+          hint.textContent = 'Click to expand';
+          node.appendChild(hint);
+        }
+      });
+    });
+  }
+};
+
+var drained = new Set();
+(window.__mermaidPending || []).forEach(function(c) {
+  if (!drained.has(c)) { drained.add(c); window.__renderMermaidIn(c); }
+});
+window.__mermaidPending = [];
+window.__mermaidReady = true;
+
+function renderActivePanels() {
+  document.querySelectorAll('.tab-panel.active').forEach(function(p) {
+    if (!drained.has(p)) { drained.add(p); window.__renderMermaidIn(p); }
+  });
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderActivePanels);
+} else {
+  renderActivePanels();
+}
+</script>
+</head><body>
+<div id="diagram-lightbox" class="diagram-lightbox" role="dialog" aria-modal="true">
+  <button class="diagram-lightbox-close" id="diagram-lightbox-close" aria-label="Close">&#x2715;</button>
+  <div class="diagram-lightbox-hint">Scroll to zoom &nbsp;&middot;&nbsp; Drag to pan &nbsp;&middot;&nbsp; Double-click to reset</div>
+  <div class="diagram-lightbox-inner" id="diagram-lightbox-inner"></div>
+</div>
+<div class="main">
+<h1>ContosoUniversity</h1>
+<div class="report-card">
+  <h2>Component Information</h2>
+  <div class="report-card-body">
+    <div class="app-info-container">
+      <div class="app-info-column">
+        <div class="app-info-row"><span class="app-info-label">Component Name</span><span class="app-info-value">ContosoUniversity</span></div>
+        <div class="app-info-row"><span class="app-info-label">Effort</span><span class="app-info-value" id="effort-display">XL (total story points: 236)</span></div>
+      </div>
+      <div class="app-info-column">
+        <div class="app-info-row"><span class="app-info-label">Build Tools</span><span class="app-info-value">MSBuild, NuGet packages.config</span></div>
+        <div class="app-info-row"><span class="app-info-label">Frameworks</span><span class="app-info-value">ASP.NET MVC 5.2.9, .NET Framework 4.8, Entity Framework Core 3.1.32</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="tab-issues" data-tooltip="Issues detected in the source code">Issues</button>
+  <button class="tab-btn" data-tab="tab-arch" data-tooltip="How the app&#x27;s layers connect — from UI to data.">Architecture</button>
+  <button class="tab-btn" data-tab="tab-api" data-tooltip="Endpoints exposed by this app and how services communicate.">API Contracts</button>
+  <button class="tab-btn" data-tab="tab-config" data-tooltip="Environment settings, runtime profiles, and deployment manifests.">Configuration</button>
+  <button class="tab-btn" data-tab="tab-workflows" data-tooltip="Domain entities and the core flows users move through.">Business Workflows</button>
+  <button class="tab-btn" data-tab="tab-deps" data-tooltip="Libraries and frameworks this app depends on, grouped by category.">Dependencies</button>
+  <button class="tab-btn" data-tab="tab-data" data-tooltip="Database schema, entity relationships, and persistence behavior.">Data Model</button>
+</nav>
+<div id="tab-issues" class="tab-panel active">
+<div class="report-card">
+  <h2>Issue Summary</h2>
+  <div class="report-card-body">
+    <div class="domain-summary-container" id="donut-container">
+      <div class="domain-summary-item">
+<svg viewBox="0 0 100 100" width="100" height="100" style="display:block;margin:0 auto;transform:rotate(-90deg);">
+  <circle cx="50" cy="50" r="35" fill="none" stroke="var(--color-mandatory)" stroke-width="15" stroke-dasharray="130.45 219.91" stroke-dashoffset="-0.00"/>
+  <circle cx="50" cy="50" r="35" fill="none" stroke="var(--color-potential)" stroke-width="15" stroke-dasharray="86.46 219.91" stroke-dashoffset="-131.95"/>
+</svg>
+
+        <h3>Cloud Readiness</h3>
+        <div class="count">10 issues</div>
+      </div>
+      <div class="domain-summary-item">
+<svg viewBox="0 0 100 100" width="100" height="100" style="display:block;margin:0 auto;transform:rotate(-90deg);">
+  <circle cx="50" cy="50" r="35" fill="none" stroke="var(--color-mandatory)" stroke-width="15" stroke-dasharray="145.11 219.91" stroke-dashoffset="-0.00"/>
+  <circle cx="50" cy="50" r="35" fill="none" stroke="var(--color-potential)" stroke-width="15" stroke-dasharray="53.48 219.91" stroke-dashoffset="-146.61"/>
+  <circle cx="50" cy="50" r="35" fill="none" stroke="var(--color-optional)" stroke-width="15" stroke-dasharray="16.83 219.91" stroke-dashoffset="-201.59"/>
+</svg>
+
+        <h3>DotNET Upgrade</h3>
+        <div class="count">12 issues</div>
+      </div>
+      <div class="domain-summary-item">
+<svg viewBox="0 0 100 100" width="100" height="100" style="display:block;margin:0 auto;transform:rotate(-90deg);">
+  <circle cx="50" cy="50" r="35" fill="none" stroke="var(--color-mandatory)" stroke-width="15" stroke-dasharray="71.80 219.91" stroke-dashoffset="-0.00"/>
+  <circle cx="50" cy="50" r="35" fill="none" stroke="var(--color-potential)" stroke-width="15" stroke-dasharray="145.11 219.91" stroke-dashoffset="-73.30"/>
+</svg>
+
+        <h3>Security</h3>
+        <div class="count">3 issues</div>
+      </div>
+    </div>
+    <div class="criticality-legend">
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--color-mandatory)"></span>Mandatory</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--color-potential)"></span>Potential</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--color-optional)"></span>Optional</div>
+    </div>
+  </div>
+</div>
+<div class="filter-bar" id="filter-bar">
+  <div class="multi-select" id="domain-ms">
+    <button class="multi-select-btn" onclick="toggleMultiSelect('domain-ms')">Domain</button>
+    <div class="multi-select-dropdown">
+      <label class="multi-select-option"><input type="checkbox" value="cloud-readiness" onchange="onMultiSelectChange('domain-ms','Domain')"/> Cloud Readiness</label>
+      <label class="multi-select-option"><input type="checkbox" value="dotnet-upgrade" onchange="onMultiSelectChange('domain-ms','Domain')"/> DotNET Upgrade</label>
+      <label class="multi-select-option"><input type="checkbox" value="security" onchange="onMultiSelectChange('domain-ms','Domain')"/> Security</label>
+    </div>
+  </div>
+  <div class="multi-select" id="criticality-ms">
+    <button class="multi-select-btn" onclick="toggleMultiSelect('criticality-ms')">Criticality</button>
+    <div class="multi-select-dropdown">
+      <label class="multi-select-option"><input type="checkbox" value="mandatory" onchange="onMultiSelectChange('criticality-ms','Criticality')"/> Mandatory</label>
+      <label class="multi-select-option"><input type="checkbox" value="potential" onchange="onMultiSelectChange('criticality-ms','Criticality')"/> Potential</label>
+      <label class="multi-select-option"><input type="checkbox" value="optional" onchange="onMultiSelectChange('criticality-ms','Criticality')"/> Optional</label>
+    </div>
+  </div>
+  <a class="clear-filters" href="javascript:void(0)" onclick="clearAllFilters()">Clear all</a>
+</div>
+<div class="issue-section" data-domain="cloud-readiness">
+  <h2>Cloud Readiness</h2>
+  <table class="issue-table">
+    <colgroup><col class="col-issue"/><col class="col-criticality"/><col class="col-storypoint"/></colgroup>
+    <thead><tr><th>Issue Category</th><th>Criticality</th><th>Story Point</th></tr></thead>
+    <tbody>
+    <tr class="issue-row" data-criticality="mandatory" data-targets='{}' data-default-effort="13" data-default-severity="mandatory" data-rule="MSQUEUECOMPAT001" onclick="toggleRow('row-cloudreadiness-0', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-cloudreadiness-0">&#x276F;</button> MSMQ (System.Messaging) not supported in cloud</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-mandatory"></span>Mandatory</span></td>
+      <td class="sp-cell">13</td>
+    </tr>
+    <tr class="detail-row" id="row-cloudreadiness-0" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/Services/NotificationService.cs">ContosoUniversity/Services/NotificationService.cs</span></td><td><span class="position">Line 1</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Services/NotificationService.cs">ContosoUniversity/Services/NotificationService.cs</span></td><td><span class="position">Line 18</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Services/NotificationService.cs">ContosoUniversity/Services/NotificationService.cs</span></td><td><span class="position">Line 27</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>System.Messaging (MSMQ) is a Windows-only messaging technology that is not available in Azure App Service or containerized deployments. Replace with Azure Service Bus, Azure Queue Storage, or another cloud-native messaging solution.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="mandatory" data-targets='{&quot;aks&quot;:{&quot;effort&quot;:8,&quot;severity&quot;:null}}' data-default-effort="8" data-default-severity="mandatory" data-rule="HTTPPOSTEDFILE001" onclick="toggleRow('row-cloudreadiness-1', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-cloudreadiness-1">&#x276F;</button> HttpPostedFileBase file upload requires migration</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-mandatory"></span>Mandatory</span></td>
+      <td class="sp-cell">8</td>
+    </tr>
+    <tr class="detail-row" id="row-cloudreadiness-1" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/Controllers/CoursesController.cs">ContosoUniversity/Controllers/CoursesController.cs</span></td><td><span class="position">Line 35</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Controllers/CoursesController.cs">ContosoUniversity/Controllers/CoursesController.cs</span></td><td><span class="position">Line 95</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>HttpPostedFileBase is a System.Web type that is not available outside of ASP.NET on .NET Framework. Migrate to IFormFile (ASP.NET Core) and store uploaded files in Azure Blob Storage or a persistent volume.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="mandatory" data-targets='{&quot;aks&quot;:{&quot;effort&quot;:5,&quot;severity&quot;:null}}' data-default-effort="5" data-default-severity="mandatory" data-rule="SERVERMAPPATH001" onclick="toggleRow('row-cloudreadiness-2', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-cloudreadiness-2">&#x276F;</button> Server.MapPath not available in cloud hosting</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-mandatory"></span>Mandatory</span></td>
+      <td class="sp-cell">5</td>
+    </tr>
+    <tr class="detail-row" id="row-cloudreadiness-2" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/Controllers/CoursesController.cs">ContosoUniversity/Controllers/CoursesController.cs</span></td><td><span class="position">Line 65</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>Server.MapPath resolves physical file paths on the server and is not supported outside of IIS/ASP.NET classic. Use IHostingEnvironment.WebRootPath or IWebHostEnvironment.ContentRootPath in ASP.NET Core, or store files in Azure Blob Storage.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="mandatory" data-targets='{}' data-default-effort="8" data-default-severity="mandatory" data-rule="WEBCONFIG001" onclick="toggleRow('row-cloudreadiness-3', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-cloudreadiness-3">&#x276F;</button> Web.config-based configuration not supported in cloud</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-mandatory"></span>Mandatory</span></td>
+      <td class="sp-cell">8</td>
+    </tr>
+    <tr class="detail-row" id="row-cloudreadiness-3" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/Web.config">ContosoUniversity/Web.config</span></td><td><span class="position">Line 1</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>Web.config is an IIS-specific configuration mechanism. Migrate configuration to appsettings.json, environment variables, or Azure App Configuration for cloud deployments.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="mandatory" data-targets='{}' data-default-effort="40" data-default-severity="mandatory" data-rule="LEGACYFRAMEWORK001" onclick="toggleRow('row-cloudreadiness-4', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-cloudreadiness-4">&#x276F;</button> Legacy ASP.NET MVC 5 on .NET Framework 4.8</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-mandatory"></span>Mandatory</span></td>
+      <td class="sp-cell">40</td>
+    </tr>
+    <tr class="detail-row" id="row-cloudreadiness-4" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/ContosoUniversity.csproj">ContosoUniversity/ContosoUniversity.csproj</span></td><td><span class="position">Line 10</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>The project targets .NET Framework 4.8 using ASP.NET MVC 5. Migrate to ASP.NET Core on .NET 8 or later to benefit from cross-platform support, improved performance, and cloud-native features.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="mandatory" data-targets='{}' data-default-effort="5" data-default-severity="mandatory" data-rule="GLOBALASAX001" onclick="toggleRow('row-cloudreadiness-5', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-cloudreadiness-5">&#x276F;</button> Global.asax application lifecycle not available</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-mandatory"></span>Mandatory</span></td>
+      <td class="sp-cell">5</td>
+    </tr>
+    <tr class="detail-row" id="row-cloudreadiness-5" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/Global.asax">ContosoUniversity/Global.asax</span></td><td><span class="position">Line 1</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>Global.asax is an IIS/ASP.NET-specific application lifecycle handler. Migrate startup logic to Program.cs and Startup.cs in ASP.NET Core using the middleware pipeline and hosted services.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="potential" data-targets='{}' data-default-effort="5" data-default-severity="potential" data-rule="SYSCONFIGMGR001" onclick="toggleRow('row-cloudreadiness-6', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-cloudreadiness-6">&#x276F;</button> System.Configuration.ConfigurationManager usage</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-potential"></span>Potential</span></td>
+      <td class="sp-cell">5</td>
+    </tr>
+    <tr class="detail-row" id="row-cloudreadiness-6" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/Data/SchoolContextFactory.cs">ContosoUniversity/Data/SchoolContextFactory.cs</span></td><td><span class="position">Line 10</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Services/NotificationService.cs">ContosoUniversity/Services/NotificationService.cs</span></td><td><span class="position">Line 14</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>ConfigurationManager reads from Web.config/App.config files. In cloud deployments, configuration should be externalized to environment variables, Azure App Configuration, or Key Vault.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="potential" data-targets='{}' data-default-effort="3" data-default-severity="potential" data-rule="LOCALDB001" onclick="toggleRow('row-cloudreadiness-7', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-cloudreadiness-7">&#x276F;</button> LocalDB connection string not suitable for cloud</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-potential"></span>Potential</span></td>
+      <td class="sp-cell">3</td>
+    </tr>
+    <tr class="detail-row" id="row-cloudreadiness-7" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/Web.config">ContosoUniversity/Web.config</span></td><td><span class="position">Line 8</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>The connection string references SQL Server LocalDB which is a development-only database. Replace with a cloud-accessible SQL Server or Azure SQL Database connection string managed through environment variables or Key Vault.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="potential" data-targets='{}' data-default-effort="3" data-default-severity="potential" data-rule="PACKAGESCFG001" onclick="toggleRow('row-cloudreadiness-8', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-cloudreadiness-8">&#x276F;</button> Legacy packages.config format</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-potential"></span>Potential</span></td>
+      <td class="sp-cell">3</td>
+    </tr>
+    <tr class="detail-row" id="row-cloudreadiness-8" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/packages.config">ContosoUniversity/packages.config</span></td><td><span class="position">Line 1</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>The project uses the legacy packages.config format for NuGet references. Migrate to PackageReference format in the .csproj file for better dependency management and compatibility with the .NET SDK.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="potential" data-targets='{}' data-default-effort="3" data-default-severity="potential" data-rule="IISEXPRESS001" onclick="toggleRow('row-cloudreadiness-9', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-cloudreadiness-9">&#x276F;</button> IIS-specific hosting configuration</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-potential"></span>Potential</span></td>
+      <td class="sp-cell">3</td>
+    </tr>
+    <tr class="detail-row" id="row-cloudreadiness-9" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/ContosoUniversity.csproj">ContosoUniversity/ContosoUniversity.csproj</span></td><td><span class="position">Line 13</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>The project is configured for IIS/IIS Express hosting (ProjectTypeGuids reference IIS). Cloud deployments typically use Kestrel or Docker containers. Remove IIS-specific project type GUIDs and configure for cross-platform hosting.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<div class="issue-section" data-domain="dotnet-upgrade">
+  <h2>DotNET Upgrade <a href="scenarios/dotnet-version-upgrade/assessment.html" style="font-size:12px;font-weight:400;margin-left:12px;">View Details</a></h2>
+  <table class="issue-table">
+    <colgroup><col class="col-issue"/><col class="col-criticality"/><col class="col-storypoint"/></colgroup>
+    <thead><tr><th>Issue Category</th><th>Criticality</th><th>Story Point</th></tr></thead>
+    <tbody>
+    <tr class="issue-row" data-criticality="mandatory" data-targets='{}' data-default-effort="40" data-default-severity="mandatory" data-rule="UA-001" onclick="toggleRow('row-dotnetupgrade-0', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-dotnetupgrade-0">&#x276F;</button> ASP.NET MVC 5 (System.Web) requires migration to ASP.NET Core MVC</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-mandatory"></span>Mandatory</span></td>
+      <td class="sp-cell">40</td>
+    </tr>
+    <tr class="detail-row" id="row-dotnetupgrade-0" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/Controllers/BaseController.cs">ContosoUniversity/Controllers/BaseController.cs</span></td><td><span class="position">Line 1</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Controllers/StudentsController.cs">ContosoUniversity/Controllers/StudentsController.cs</span></td><td><span class="position">Line 1</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Controllers/CoursesController.cs">ContosoUniversity/Controllers/CoursesController.cs</span></td><td><span class="position">Line 1</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Controllers/DepartmentsController.cs">ContosoUniversity/Controllers/DepartmentsController.cs</span></td><td><span class="position">Line 1</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Controllers/InstructorsController.cs">ContosoUniversity/Controllers/InstructorsController.cs</span></td><td><span class="position">Line 1</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Controllers/NotificationsController.cs">ContosoUniversity/Controllers/NotificationsController.cs</span></td><td><span class="position">Line 1</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>ASP.NET MVC 5 is built on System.Web which does not exist in .NET Core or .NET 5+. The entire web framework layer must be rewritten using ASP.NET Core MVC controllers, Razor views, and middleware pipeline.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="mandatory" data-targets='{}' data-default-effort="20" data-default-severity="mandatory" data-rule="UA-002" onclick="toggleRow('row-dotnetupgrade-1', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-dotnetupgrade-1">&#x276F;</button> System.Web namespace not available in .NET 10</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-mandatory"></span>Mandatory</span></td>
+      <td class="sp-cell">20</td>
+    </tr>
+    <tr class="detail-row" id="row-dotnetupgrade-1" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/Controllers/CoursesController.cs">ContosoUniversity/Controllers/CoursesController.cs</span></td><td><span class="position">Line 5</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Controllers/StudentsController.cs">ContosoUniversity/Controllers/StudentsController.cs</span></td><td><span class="position">Line 5</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Global.asax.cs">ContosoUniversity/Global.asax.cs</span></td><td><span class="position">Line 2</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>All types from System.Web (HttpContext, HttpRequest, HttpResponse, HttpPostedFileBase, HttpServerUtility, etc.) are not available in .NET 10. Replace with Microsoft.AspNetCore.Http equivalents.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="mandatory" data-targets='{}' data-default-effort="5" data-default-severity="mandatory" data-rule="UA-004" onclick="toggleRow('row-dotnetupgrade-2', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-dotnetupgrade-2">&#x276F;</button> System.Configuration.ConfigurationManager not available</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-mandatory"></span>Mandatory</span></td>
+      <td class="sp-cell">5</td>
+    </tr>
+    <tr class="detail-row" id="row-dotnetupgrade-2" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/Data/SchoolContextFactory.cs">ContosoUniversity/Data/SchoolContextFactory.cs</span></td><td><span class="position">Line 10</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Global.asax.cs">ContosoUniversity/Global.asax.cs</span></td><td><span class="position">Line 26</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Services/NotificationService.cs">ContosoUniversity/Services/NotificationService.cs</span></td><td><span class="position">Line 14</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>ConfigurationManager is not available in .NET 10 (System.Configuration.dll ships with .NET Framework only). Replace with Microsoft.Extensions.Configuration and appsettings.json or environment variables.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="mandatory" data-targets='{}' data-default-effort="5" data-default-severity="mandatory" data-rule="UA-003" onclick="toggleRow('row-dotnetupgrade-3', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-dotnetupgrade-3">&#x276F;</button> Global.asax application lifecycle must be migrated</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-mandatory"></span>Mandatory</span></td>
+      <td class="sp-cell">5</td>
+    </tr>
+    <tr class="detail-row" id="row-dotnetupgrade-3" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/Global.asax">ContosoUniversity/Global.asax</span></td><td><span class="position">Line 1</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Global.asax.cs">ContosoUniversity/Global.asax.cs</span></td><td><span class="position">Line 1</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>Global.asax and Application_Start are not supported in .NET 10. Migrate startup logic to Program.cs and Startup.cs using the ASP.NET Core middleware pipeline and IHostedService.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="mandatory" data-targets='{}' data-default-effort="3" data-default-severity="mandatory" data-rule="UA-005" onclick="toggleRow('row-dotnetupgrade-4', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-dotnetupgrade-4">&#x276F;</button> System.Web.Optimization (bundling) not supported</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-mandatory"></span>Mandatory</span></td>
+      <td class="sp-cell">3</td>
+    </tr>
+    <tr class="detail-row" id="row-dotnetupgrade-4" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/App_Start/BundleConfig.cs">ContosoUniversity/App_Start/BundleConfig.cs</span></td><td><span class="position">Line 1</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>Microsoft.AspNet.Web.Optimization and BundleConfig are not available in .NET 10. Use libman, npm, or Webpack for client-side asset management in ASP.NET Core.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="mandatory" data-targets='{}' data-default-effort="13" data-default-severity="mandatory" data-rule="UA-006" onclick="toggleRow('row-dotnetupgrade-5', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-dotnetupgrade-5">&#x276F;</button> System.Messaging (MSMQ) not available in .NET 10</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-mandatory"></span>Mandatory</span></td>
+      <td class="sp-cell">13</td>
+    </tr>
+    <tr class="detail-row" id="row-dotnetupgrade-5" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/Services/NotificationService.cs">ContosoUniversity/Services/NotificationService.cs</span></td><td><span class="position">Line 1</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>System.Messaging is a Windows-only .NET Framework assembly not included in .NET 10. Replace with Azure Service Bus, Azure Queue Storage, or the community package CoreWCF.Primitives for basic MSMQ migration.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="mandatory" data-targets='{}' data-default-effort="8" data-default-severity="mandatory" data-rule="UA-007" onclick="toggleRow('row-dotnetupgrade-6', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-dotnetupgrade-6">&#x276F;</button> Entity Framework Core 3.1 must be upgraded to EF Core 9+</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-mandatory"></span>Mandatory</span></td>
+      <td class="sp-cell">8</td>
+    </tr>
+    <tr class="detail-row" id="row-dotnetupgrade-6" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/ContosoUniversity.csproj">ContosoUniversity/ContosoUniversity.csproj</span></td><td><span class="position">Line 1</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>EF Core 3.1 is end-of-life and incompatible with .NET 10. Upgrade to EF Core 9.0 or 10.0. Most DbContext and LINQ query code is compatible, but review deprecated APIs, migration tooling, and provider updates.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="mandatory" data-targets='{}' data-default-effort="5" data-default-severity="mandatory" data-rule="UA-008" onclick="toggleRow('row-dotnetupgrade-7', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-dotnetupgrade-7">&#x276F;</button> Legacy .csproj format (non-SDK style) must be converted</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-mandatory"></span>Mandatory</span></td>
+      <td class="sp-cell">5</td>
+    </tr>
+    <tr class="detail-row" id="row-dotnetupgrade-7" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/ContosoUniversity.csproj">ContosoUniversity/ContosoUniversity.csproj</span></td><td><span class="position">Line 1</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>The project uses the legacy MSBuild project format with full Assembly/ProjectType GUIDs. Convert to SDK-style project format (.NET SDK .csproj) for .NET 10 compatibility. Use the sdk-style-conversion scenario.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="potential" data-targets='{}' data-default-effort="13" data-default-severity="potential" data-rule="UA-009" onclick="toggleRow('row-dotnetupgrade-8', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-dotnetupgrade-8">&#x276F;</button> Razor views need migration from MVC 5 Razor to ASP.NET Core Razor</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-potential"></span>Potential</span></td>
+      <td class="sp-cell">13</td>
+    </tr>
+    <tr class="detail-row" id="row-dotnetupgrade-8" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/Views/Instructors/Index.cshtml">ContosoUniversity/Views/Instructors/Index.cshtml</span></td><td><span class="position">Line 1</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>Razor view syntax is mostly compatible, but MVC 5-specific helpers (@Html.Action, @Html.Partial, SelectList via ViewBag) may need updates. Tag Helpers replace many HTML helpers in ASP.NET Core.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="potential" data-targets='{}' data-default-effort="3" data-default-severity="potential" data-rule="UA-010" onclick="toggleRow('row-dotnetupgrade-9', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-dotnetupgrade-9">&#x276F;</button> packages.config must be migrated to PackageReference</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-potential"></span>Potential</span></td>
+      <td class="sp-cell">3</td>
+    </tr>
+    <tr class="detail-row" id="row-dotnetupgrade-9" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/packages.config">ContosoUniversity/packages.config</span></td><td><span class="position">Line 1</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>The packages.config NuGet format is not supported in SDK-style projects. Migrate to PackageReference format. Many packages referenced (ASP.NET MVC, WebGrease, Antlr, WebPages) will be removed as they are replaced by ASP.NET Core packages.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="potential" data-targets='{}' data-default-effort="2" data-default-severity="potential" data-rule="UA-011" onclick="toggleRow('row-dotnetupgrade-10', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-dotnetupgrade-10">&#x276F;</button> Microsoft.Data.SqlClient upgrade required</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-potential"></span>Potential</span></td>
+      <td class="sp-cell">2</td>
+    </tr>
+    <tr class="detail-row" id="row-dotnetupgrade-10" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/packages.config">ContosoUniversity/packages.config</span></td><td><span class="position">Line 1</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>Microsoft.Data.SqlClient 2.1.4 is outdated. Upgrade to the latest version (5.x) for .NET 10 compatibility and security patches.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="optional" data-targets='{}' data-default-effort="5" data-default-severity="optional" data-rule="UA-012" onclick="toggleRow('row-dotnetupgrade-11', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-dotnetupgrade-11">&#x276F;</button> Newtonsoft.Json can be replaced with System.Text.Json</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-optional"></span>Optional</span></td>
+      <td class="sp-cell">5</td>
+    </tr>
+    <tr class="detail-row" id="row-dotnetupgrade-11" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><colgroup><col style="width:70%"/><col style="width:30%"/></colgroup>
+            <thead><tr><th>File</th><th>Position</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/packages.config">ContosoUniversity/packages.config</span></td><td><span class="position">Line 1</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>Newtonsoft.Json 13.0.3 is still compatible with .NET 10 but System.Text.Json is the built-in, high-performance alternative. Consider migrating for reduced dependencies and improved performance.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<div class="issue-section" data-domain="security">
+  <h2>Security <span class="badge-experimental" title="These issues were generated by AI and may contain inaccuracies or incomplete information. Please review carefully.">Experimental</span></h2>
+  <table class="issue-table">
+    <colgroup><col class="col-issue"/><col class="col-criticality"/><col class="col-storypoint"/></colgroup>
+    <thead><tr><th>Issue Category</th><th>Criticality</th><th>Story Point</th></tr></thead>
+    <tbody>
+    <tr class="issue-row" data-criticality="mandatory" onclick="toggleRow('row-security-0', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-security-0">&#x276F;</button> SEC-001: No authentication or authorization implemented</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-mandatory"></span>Mandatory</span></td>
+      <td class="sp-cell">13</td>
+    </tr>
+    <tr class="detail-row" id="row-security-0" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><thead><tr><th>File</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/Controllers/BaseController.cs">ContosoUniversity/Controllers/BaseController.cs</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Controllers/StudentsController.cs">ContosoUniversity/Controllers/StudentsController.cs</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Controllers/CoursesController.cs">ContosoUniversity/Controllers/CoursesController.cs</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Controllers/InstructorsController.cs">ContosoUniversity/Controllers/InstructorsController.cs</span></td></tr>
+            <tr><td><span class="file-path" title="ContosoUniversity/Controllers/DepartmentsController.cs">ContosoUniversity/Controllers/DepartmentsController.cs</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>The application has no authentication or authorization mechanisms. All controllers and actions are publicly accessible. Implement ASP.NET Core Identity or Azure AD authentication before cloud deployment.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="potential" onclick="toggleRow('row-security-1', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-security-1">&#x276F;</button> SEC-002: File upload without path traversal protection</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-potential"></span>Potential</span></td>
+      <td class="sp-cell">5</td>
+    </tr>
+    <tr class="detail-row" id="row-security-1" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><thead><tr><th>File</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/Controllers/CoursesController.cs">ContosoUniversity/Controllers/CoursesController.cs</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>The CoursesController uploads files to a server path constructed from user input. While file extension validation exists, there is no defense against path traversal attacks. Use a safe file storage approach (Azure Blob Storage) with server-generated filenames.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr class="issue-row" data-criticality="potential" onclick="toggleRow('row-security-2', this)" style="cursor:pointer;">
+      <td style="white-space:normal;"><div class="issue-title-cell"><button class="expand-btn" id="btn-row-security-2">&#x276F;</button> SEC-003: MSMQ queue permissions set to Everyone/FullControl</div></td>
+      <td class="crit-cell"><span class="crit-label"><span class="crit-square crit-square-potential"></span>Potential</span></td>
+      <td class="sp-cell">3</td>
+    </tr>
+    <tr class="detail-row" id="row-security-2" style="display:none;">
+      <td colspan="3">
+        <div class="detail-content">
+          <div class="file-list">
+            <table><thead><tr><th>File</th></tr></thead><tbody>
+            <tr><td><span class="file-path" title="ContosoUniversity/Services/NotificationService.cs">ContosoUniversity/Services/NotificationService.cs</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="explanation-panel">
+            <h4>Explanation</h4>
+            <div><p>The NotificationService grants FullControl permissions on the MSMQ queue to &#x27;Everyone&#x27;. This is overly permissive and should be restricted to the application&#x27;s service account.</p></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</div><!-- #tab-issues -->
+<div id="tab-arch" class="tab-panel">
+  <div class="fact-content"><h1 id="architecture-diagram">Architecture Diagram</h1>
+<p>ContosoUniversity is a legacy ASP.NET MVC 5 web application targeting .NET Framework 4.8, implementing a university management system with server-side rendered views and a SQL Server database accessed via Entity Framework Core.</p>
+<h2 id="application-architecture">Application Architecture</h2>
+<div class="mermaid">
+flowchart TD
+    subgraph Client["Client Layer"]
+        Browser["Web Browser"]
+    end
+    subgraph App["Application Layer - ASP.NET MVC 5 / .NET Framework 4.8"]
+        MVC["ASP.NET MVC 5 Controllers + Razor Views"]
+        Bundle["Script/CSS Bundling (WebOptimization)"]
+        GlobalAsax["Global.asax Application Lifecycle"]
+    end
+    subgraph Services["Service Layer"]
+        NotifSvc["NotificationService (MSMQ)"]
+        LogSvc["LoggingService"]
+    end
+    subgraph Data["Data Layer"]
+        EFCore["Entity Framework Core 3.1 DbContext"]
+        DB[("SQL Server LocalDB")]
+        MSMQ[("MSMQ Private Queue")]
+    end
+    subgraph External["External / Infrastructure"]
+        IIS["IIS Express Host"]
+        FileSystem["Local File System (Uploads)"]
+    end
+
+    Browser -->|"HTTP requests"| IIS
+    IIS -->|"routes"| MVC
+    MVC -->|"creates/queries"| EFCore
+    MVC -->|"triggers"| NotifSvc
+    EFCore -->|"SQL queries"| DB
+    NotifSvc -->|"enqueues messages"| MSMQ
+    MVC -->|"serves static assets"| Bundle
+    GlobalAsax -->|"seeds on startup"| EFCore
+    MVC -->|"file upload path"| FileSystem
+</div>
+<h3 id="technology-stack-summary">Technology Stack Summary</h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Layer</th><th>Technology</th><th>Version</th><th>Purpose</th>
+</tr></thead><tbody>
+<tr><td>Presentation</td><td>ASP.NET MVC</td><td>5.2.9</td><td>Server-side MVC web framework</td></tr>
+<tr><td>Presentation</td><td>Razor Views</td><td>3.2.9</td><td>HTML templating engine</td></tr>
+<tr><td>Presentation</td><td>Bootstrap</td><td>5.3.3</td><td>CSS/UI framework</td></tr>
+<tr><td>Presentation</td><td>jQuery</td><td>3.7.1</td><td>Client-side scripting</td></tr>
+<tr><td>Business Logic</td><td>C# / .NET Framework</td><td>4.8</td><td>Application runtime</td></tr>
+<tr><td>Data Access</td><td>Entity Framework Core</td><td>3.1.32</td><td>ORM for SQL Server</td></tr>
+<tr><td>Data Access</td><td>Microsoft.Data.SqlClient</td><td>2.1.4</td><td>SQL Server driver</td></tr>
+<tr><td>Messaging</td><td>System.Messaging (MSMQ)</td><td>Windows built-in</td><td>Notification queue</td></tr>
+<tr><td>Serialization</td><td>Newtonsoft.Json</td><td>13.0.3</td><td>JSON serialization</td></tr>
+<tr><td>Security</td><td>Microsoft.Identity.Client</td><td>4.21.1</td><td>Identity library (unused in app)</td></tr>
+<tr><td>Bundling</td><td>Microsoft.AspNet.Web.Optimization</td><td>1.1.3</td><td>CSS/JS bundling and minification</td></tr>
+<tr><td>Host</td><td>IIS / IIS Express</td><td>—</td><td>Web server</td></tr>
+</tbody></table></div>
+<h3 id="data-storage-external-services">Data Storage & External Services</h3>
+<p>The application uses a single SQL Server LocalDB instance (<code>ContosoUniversityNoAuthEFCore</code>) for all persistent data, accessed through Entity Framework Core 3.1 via the <code>SchoolContext</code> DbContext. File uploads (teaching material images for courses) are stored on the local server file system under <code>~/Uploads/TeachingMaterials/</code>. Notifications are dispatched asynchronously via a Windows MSMQ private queue (<code>.\Private$\ContosoUniversityNotifications</code>) and are also persisted to the <code>Notification</code> table in the database for the notifications dashboard.</p>
+<h3 id="key-architectural-decisions">Key Architectural Decisions</h3>
+<ul>
+<li><strong>Table-per-Hierarchy (TPH) inheritance</strong>: <code>Student</code> and <code>Instructor</code> both extend the abstract <code>Person</code> class and are stored in a single <code>Person</code> table with a <code>Discriminator</code> column.</li>
+<li><strong>Hybrid ORM</strong>: Entity Framework Core 3.1 is used as the ORM within a legacy ASP.NET MVC 5 / .NET Framework 4.8 project — a non-standard combination that limits cross-platform portability.</li>
+<li><strong>MSMQ for notifications</strong>: Application-level change notifications (CREATE/UPDATE/DELETE) are published to an MSMQ queue, making the notification subsystem Windows-only and incompatible with cloud hosting without replacement.</li>
+</ul>
+<h2 id="component-relationships">Component Relationships</h2>
+<div class="mermaid">
+flowchart LR
+    subgraph Presentation["Presentation"]
+        HomeCtrl["HomeController"]
+        StudentCtrl["StudentsController"]
+        CourseCtrl["CoursesController"]
+        DeptCtrl["DepartmentsController"]
+        InstrCtrl["InstructorsController"]
+        NotifCtrl["NotificationsController"]
+        BaseCtrl["BaseController (abstract)"]
+    end
+    subgraph Business["Business / Services"]
+        NotifSvc["NotificationService"]
+        LogSvc["LoggingService"]
+        DbInit["DbInitializer"]
+    end
+    subgraph DataAccess["Data Access"]
+        SchoolCtx["SchoolContext (DbContext)"]
+        CtxFactory["SchoolContextFactory"]
+    end
+    subgraph Models["Domain Models"]
+        Person["Person (abstract)"]
+        Student["Student"]
+        Instructor["Instructor"]
+        Course["Course"]
+        Department["Department"]
+        Enrollment["Enrollment"]
+        OfficeAssign["OfficeAssignment"]
+        CourseAssign["CourseAssignment"]
+        Notification["Notification"]
+    end
+
+    StudentCtrl -->|"inherits"| BaseCtrl
+    CourseCtrl -->|"inherits"| BaseCtrl
+    DeptCtrl -->|"inherits"| BaseCtrl
+    InstrCtrl -->|"inherits"| BaseCtrl
+    NotifCtrl -->|"inherits"| BaseCtrl
+    HomeCtrl -->|"inherits"| BaseCtrl
+    BaseCtrl -->|"creates via factory"| CtxFactory
+    CtxFactory -->|"instantiates"| SchoolCtx
+    BaseCtrl -->|"holds"| NotifSvc
+    NotifCtrl -->|"reads queue"| NotifSvc
+    StudentCtrl -->|"queries"| SchoolCtx
+    CourseCtrl -->|"queries"| SchoolCtx
+    DeptCtrl -->|"queries"| SchoolCtx
+    InstrCtrl -->|"queries"| SchoolCtx
+    SchoolCtx -.->|"owns"| Person
+    SchoolCtx -.->|"owns"| Course
+    SchoolCtx -.->|"owns"| Department
+    SchoolCtx -.->|"owns"| Enrollment
+    SchoolCtx -.->|"owns"| Notification
+    Student -.->|"extends"| Person
+    Instructor -.->|"extends"| Person
+</div>
+<h3 id="component-inventory">Component Inventory</h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Component</th><th>Layer</th><th>Type</th><th>Responsibility</th>
+</tr></thead><tbody>
+<tr><td>BaseController</td><td>Presentation</td><td>Abstract MVC Controller</td><td>Provides shared <code>SchoolContext</code>, <code>NotificationService</code>, and <code>SendEntityNotification</code> helper</td></tr>
+<tr><td>StudentsController</td><td>Presentation</td><td>MVC Controller</td><td>CRUD for students with pagination and search</td></tr>
+<tr><td>CoursesController</td><td>Presentation</td><td>MVC Controller</td><td>CRUD for courses including file upload for teaching materials</td></tr>
+<tr><td>DepartmentsController</td><td>Presentation</td><td>MVC Controller</td><td>CRUD for departments with instructor assignment</td></tr>
+<tr><td>InstructorsController</td><td>Presentation</td><td>MVC Controller</td><td>CRUD for instructors with office assignment and course management</td></tr>
+<tr><td>NotificationsController</td><td>Presentation</td><td>MVC Controller</td><td>JSON API for reading/managing notifications from MSMQ queue</td></tr>
+<tr><td>HomeController</td><td>Presentation</td><td>MVC Controller</td><td>Dashboard showing enrollment statistics by date</td></tr>
+<tr><td>SchoolContext</td><td>Data Access</td><td>EF Core DbContext</td><td>Defines all DbSets, model configuration (TPH, composite keys, relationships)</td></tr>
+<tr><td>SchoolContextFactory</td><td>Data Access</td><td>Static Factory</td><td>Reads connection string from ConfigurationManager and creates SchoolContext</td></tr>
+<tr><td>DbInitializer</td><td>Data Access</td><td>Static Utility</td><td>Seeds initial data (students, instructors, departments, courses)</td></tr>
+<tr><td>NotificationService</td><td>Services</td><td>Service Class</td><td>Sends/receives notifications via MSMQ; serializes to JSON</td></tr>
+<tr><td>LoggingService</td><td>Services</td><td>Service Class</td><td>Application-level logging wrapper</td></tr>
+<tr><td>Person</td><td>Domain Model</td><td>Abstract Entity</td><td>Base class for Student and Instructor (TPH)</td></tr>
+<tr><td>Student</td><td>Domain Model</td><td>Entity</td><td>Represents a student with enrollment date and enrollments</td></tr>
+<tr><td>Instructor</td><td>Domain Model</td><td>Entity</td><td>Represents an instructor with hire date, office, and course assignments</td></tr>
+<tr><td>Course</td><td>Domain Model</td><td>Entity</td><td>Academic course with title, credits, department, and teaching material</td></tr>
+<tr><td>Department</td><td>Domain Model</td><td>Entity</td><td>Academic department with budget, start date, and administrator</td></tr>
+<tr><td>Enrollment</td><td>Domain Model</td><td>Entity</td><td>Many-to-many join between Student and Course with optional grade</td></tr>
+<tr><td>CourseAssignment</td><td>Domain Model</td><td>Entity</td><td>Many-to-many join between Course and Instructor</td></tr>
+<tr><td>OfficeAssignment</td><td>Domain Model</td><td>Entity</td><td>One-to-one relationship with Instructor for office location</td></tr>
+<tr><td>Notification</td><td>Domain Model</td><td>Entity</td><td>Persisted notification record with entity type, operation, and read status</td></tr>
+</tbody></table></div></div>
+</div>
+<div id="tab-api" class="tab-panel">
+  <div class="fact-content"><h1 id="api-service-communication-contracts">API & Service Communication Contracts</h1>
+<p>ContosoUniversity exposes 30+ server-side MVC action endpoints across 6 controllers, plus a small JSON API for notification polling. All communication is synchronous HTTP/HTML with no authentication or TLS enforcement configured.</p>
+<h2 id="service-catalog">Service Catalog</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Service</th><th>Port</th><th>Category</th><th>Purpose</th>
+</tr></thead><tbody>
+<tr><td>ContosoUniversity Web App</td><td>80/443 (IIS Express)</td><td>Business</td><td>Monolithic ASP.NET MVC 5 web application for university management</td></tr>
+</tbody></table></div>
+<h2 id="api-endpoints-inventory">API Endpoints Inventory</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Controller</th><th>Method</th><th>Path</th><th>Request Type</th><th>Response Type</th>
+</tr></thead><tbody>
+<tr><td>HomeController</td><td>GET</td><td>/</td><td>—</td><td>View (enrollment statistics)</td></tr>
+<tr><td>HomeController</td><td>GET</td><td>/Home/Index</td><td>—</td><td>View (enrollment date groups)</td></tr>
+<tr><td>StudentsController</td><td>GET</td><td>/Students</td><td>sortOrder, currentFilter, searchString, page</td><td>View (paginated student list)</td></tr>
+<tr><td>StudentsController</td><td>GET</td><td>/Students/Details/{id}</td><td>id (int)</td><td>View (student + enrollments)</td></tr>
+<tr><td>StudentsController</td><td>GET</td><td>/Students/Create</td><td>—</td><td>View (create form)</td></tr>
+<tr><td>StudentsController</td><td>POST</td><td>/Students/Create</td><td>Student model (LastName, FirstMidName, EnrollmentDate)</td><td>Redirect / View</td></tr>
+<tr><td>StudentsController</td><td>GET</td><td>/Students/Edit/{id}</td><td>id (int)</td><td>View (edit form)</td></tr>
+<tr><td>StudentsController</td><td>POST</td><td>/Students/Edit/{id}</td><td>Student model</td><td>Redirect / View</td></tr>
+<tr><td>StudentsController</td><td>GET</td><td>/Students/Delete/{id}</td><td>id (int)</td><td>View (delete confirmation)</td></tr>
+<tr><td>StudentsController</td><td>POST</td><td>/Students/Delete/{id}</td><td>id (int)</td><td>Redirect</td></tr>
+<tr><td>CoursesController</td><td>GET</td><td>/Courses</td><td>—</td><td>View (course list)</td></tr>
+<tr><td>CoursesController</td><td>GET</td><td>/Courses/Details/{id}</td><td>id (int)</td><td>View</td></tr>
+<tr><td>CoursesController</td><td>GET</td><td>/Courses/Create</td><td>—</td><td>View (create form)</td></tr>
+<tr><td>CoursesController</td><td>POST</td><td>/Courses/Create</td><td>Course model + HttpPostedFileBase (image)</td><td>Redirect / View</td></tr>
+<tr><td>CoursesController</td><td>GET</td><td>/Courses/Edit/{id}</td><td>id (int)</td><td>View (edit form)</td></tr>
+<tr><td>CoursesController</td><td>POST</td><td>/Courses/Edit/{id}</td><td>Course model + HttpPostedFileBase (image)</td><td>Redirect / View</td></tr>
+<tr><td>CoursesController</td><td>GET</td><td>/Courses/Delete/{id}</td><td>id (int)</td><td>View</td></tr>
+<tr><td>CoursesController</td><td>POST</td><td>/Courses/Delete/{id}</td><td>id (int)</td><td>Redirect</td></tr>
+<tr><td>DepartmentsController</td><td>GET</td><td>/Departments</td><td>—</td><td>View</td></tr>
+<tr><td>DepartmentsController</td><td>GET</td><td>/Departments/Details/{id}</td><td>id (int)</td><td>View</td></tr>
+<tr><td>DepartmentsController</td><td>GET</td><td>/Departments/Create</td><td>—</td><td>View</td></tr>
+<tr><td>DepartmentsController</td><td>POST</td><td>/Departments/Create</td><td>Department model</td><td>Redirect / View</td></tr>
+<tr><td>DepartmentsController</td><td>GET</td><td>/Departments/Edit/{id}</td><td>id (int)</td><td>View</td></tr>
+<tr><td>DepartmentsController</td><td>POST</td><td>/Departments/Edit/{id}</td><td>Department model (with RowVersion)</td><td>Redirect / View</td></tr>
+<tr><td>DepartmentsController</td><td>GET</td><td>/Departments/Delete/{id}</td><td>id (int)</td><td>View</td></tr>
+<tr><td>DepartmentsController</td><td>POST</td><td>/Departments/Delete/{id}</td><td>id + RowVersion</td><td>Redirect</td></tr>
+<tr><td>InstructorsController</td><td>GET</td><td>/Instructors</td><td>id (int?), courseID (int?)</td><td>View</td></tr>
+<tr><td>InstructorsController</td><td>GET</td><td>/Instructors/Details/{id}</td><td>id (int)</td><td>View</td></tr>
+<tr><td>InstructorsController</td><td>GET</td><td>/Instructors/Create</td><td>—</td><td>View</td></tr>
+<tr><td>InstructorsController</td><td>POST</td><td>/Instructors/Create</td><td>Instructor model + selectedCourses[]</td><td>Redirect / View</td></tr>
+<tr><td>InstructorsController</td><td>GET</td><td>/Instructors/Edit/{id}</td><td>id (int)</td><td>View</td></tr>
+<tr><td>InstructorsController</td><td>POST</td><td>/Instructors/Edit/{id}</td><td>Instructor model + selectedCourses[]</td><td>Redirect / View</td></tr>
+<tr><td>InstructorsController</td><td>GET</td><td>/Instructors/Delete/{id}</td><td>id (int)</td><td>View</td></tr>
+<tr><td>InstructorsController</td><td>POST</td><td>/Instructors/Delete/{id}</td><td>id (int)</td><td>Redirect</td></tr>
+<tr><td>NotificationsController</td><td>GET</td><td>/Notifications/GetNotifications</td><td>—</td><td>JSON {success, notifications[], count}</td></tr>
+<tr><td>NotificationsController</td><td>POST</td><td>/Notifications/MarkAsRead</td><td>id (int)</td><td>JSON {success}</td></tr>
+<tr><td>NotificationsController</td><td>GET</td><td>/Notifications/Index</td><td>—</td><td>View (notification dashboard)</td></tr>
+</tbody></table></div>
+<h2 id="management-observability-endpoints">Management & Observability Endpoints</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Service</th><th>Endpoint</th><th>Custom Metrics</th>
+</tr></thead><tbody>
+<tr><td>ContosoUniversity</td><td>None configured</td><td>None</td></tr>
+</tbody></table></div>
+<p>No health check, metrics, or observability endpoints are exposed. No Spring Actuator equivalent (such as ASP.NET health checks at <code>/health</code>) is configured.</p>
+<h2 id="dtos-contracts">DTOs & Contracts</h2>
+<p>The application uses EF Core entity classes directly as view models — there is no separate DTO layer. Entities are passed directly to Razor views and bound from form POST bodies using <code>[Bind(Include = "...")]</code> attributes.</p>
+<p><strong>Entity classes used as view/form contracts:</strong></p>
+<ul>
+<li><code>Student</code> — form model for Create/Edit, list/detail view model</li>
+<li><code>Instructor</code> — form model for Create/Edit; combined with <code>OfficeAssignment</code> as a nested property</li>
+<li><code>Course</code> — form model including optional <code>HttpPostedFileBase</code> for image upload</li>
+<li><code>Department</code> — form model with <code>RowVersion</code> byte[] for optimistic concurrency</li>
+<li><code>Enrollment</code> — used in student details view (read-only)</li>
+<li><code>Notification</code> — used as JSON response model from NotificationsController</li>
+</ul>
+<p><strong>View-specific models (in <code>Models/SchoolViewModels/</code>):</strong></p>
+<ul>
+<li><code>InstructorIndexData</code> — aggregates <code>Instructors</code>, <code>Courses</code>, and <code>Enrollments</code> for the instructor index view</li>
+<li><code>AssignedCourseData</code> — used to render course checkboxes in instructor create/edit</li>
+<li><code>EnrollmentDateGroup</code> — used in the home page dashboard to show enrollment counts by date</li>
+</ul>
+<p>No OpenAPI/Swagger specifications, protobuf schemas, or GraphQL schemas are present. JSON serialization uses <code>Newtonsoft.Json</code> for the notifications API and <code>JsonRequestBehavior.AllowGet</code> on GET JSON actions.</p>
+<h2 id="communication-patterns">Communication Patterns</h2>
+<p><strong>Synchronous (only):</strong> All client-server communication is synchronous HTTP. The browser sends HTML form POSTs or GET requests; the server renders a Razor view or redirects. There is no AJAX beyond the notification polling script.</p>
+<p><strong>Asynchronous (MSMQ):</strong> <code>NotificationService</code> publishes change events (CREATE/UPDATE/DELETE) to a Windows MSMQ private queue (<code>.\Private$\ContosoUniversityNotifications</code>). The <code>NotificationsController.GetNotifications()</code> action polls this queue synchronously via a JavaScript <code>setInterval</code> timer on the client side. This is not true async messaging — it is a polling pattern over a local queue.</p>
+<p><strong>No resilience patterns:</strong> No circuit breaker, retry policies, timeouts, or fallback behavior are configured anywhere in the application.</p>
+<p><strong>No service discovery:</strong> The application is a monolith with no service registry. The database connection string is read directly from Web.config via <code>ConfigurationManager</code>.</p>
+<p><strong>No API gateway:</strong> The application is a single-tier monolith with no gateway layer.</p>
+<p><strong>Security posture:</strong> No authentication or TLS is configured. All 30+ action endpoints are publicly accessible with no authorization checks. The <code>[ValidateAntiForgeryToken]</code> attribute is applied on all POST actions, providing CSRF protection. No JWT, OAuth2, Basic Auth, or Windows Authentication is in use. HTTPS is not enforced at the application level.</p>
+<h2 id="service-technology-matrix">Service Technology Matrix</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Service</th><th>Web Framework</th><th>Data Access</th><th>Discovery</th><th>Gateway</th><th>Health Checks</th><th>Cache</th><th>Metrics</th>
+</tr></thead><tbody>
+<tr><td>ContosoUniversity</td><td>ASP.NET MVC 5</td><td>EF Core 3.1</td><td>None</td><td>None</td><td>None</td><td>None</td><td>None</td></tr>
+</tbody></table></div>
+<h2 id="service-communication-sequence">Service Communication Sequence</h2>
+<div class="mermaid">
+sequenceDiagram
+    participant Browser
+    participant MVC as "ASP.NET MVC Controller"
+    participant NotifSvc as "NotificationService"
+    participant EF as "SchoolContext (EF Core)"
+    participant DB as "SQL Server"
+    participant MSMQ as "MSMQ Queue"
+
+    Browser->>MVC: POST /Students/Create (form data)
+    MVC->>MVC: ModelState.IsValid check
+    alt Model is valid
+        MVC->>EF: context.Students.Add(student)
+        EF->>DB: INSERT INTO Person
+        DB-->>EF: Saved
+        EF-->>MVC: SaveChanges OK
+        MVC->>NotifSvc: SendNotification(Student, CREATE)
+        NotifSvc->>MSMQ: Queue.Send(JSON message)
+        MSMQ-->>NotifSvc: Sent
+        MVC-->>Browser: 302 Redirect to /Students
+    else Validation failed
+        MVC-->>Browser: 200 View with error messages
+    end
+
+    Note over Browser,MSMQ: Notification polling (every 30s)
+    Browser->>MVC: GET /Notifications/GetNotifications
+    MVC->>NotifSvc: ReceiveNotification (loop up to 10)
+    NotifSvc->>MSMQ: Queue.Receive (1s timeout)
+    MSMQ-->>NotifSvc: Message or timeout
+    MVC-->>Browser: JSON {notifications[], count}
+</div></div>
+</div>
+<div id="tab-config" class="tab-panel">
+  <div class="fact-content"><h1 id="configuration-externalized-settings-inventory">Configuration & Externalized Settings Inventory</h1>
+<p>ContosoUniversity uses a single <code>Web.config</code> file as its only configuration source with no environment-specific overrides, no secrets management, and no cloud configuration service integration.</p>
+<h2 id="configuration-sources">Configuration Sources</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Source</th><th>Type</th><th>Path/Location</th><th>Notes</th>
+</tr></thead><tbody>
+<tr><td>Web.config</td><td>XML Application Config</td><td>ContosoUniversity/Web.config</td><td>Primary config: connection strings, appSettings, runtime assembly redirects</td></tr>
+<tr><td>packages.config</td><td>NuGet Packages</td><td>ContosoUniversity/packages.config</td><td>NuGet dependency declarations (legacy format)</td></tr>
+<tr><td>Global.asax.cs</td><td>Startup Code</td><td>ContosoUniversity/Global.asax.cs</td><td>Application lifecycle; reads connection string at startup for DB seeding</td></tr>
+<tr><td>ContosoUniversity.csproj</td><td>MSBuild Project</td><td>ContosoUniversity/ContosoUniversity.csproj</td><td>Build configuration, project type GUIDs, IIS Express settings</td></tr>
+</tbody></table></div>
+<p>No Spring Cloud Config, Azure App Configuration, Consul KV, HashiCorp Vault, Azure KeyVault, or AWS Secrets Manager integrations are present.</p>
+<h2 id="build-profiles">Build Profiles</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Profile</th><th>Activation</th><th>Purpose</th><th>Key Dependencies/Plugins</th>
+</tr></thead><tbody>
+<tr><td>Debug</td><td>Default (no flag)</td><td>Development build with debug symbols</td><td><code><DebugSymbols>true</DebugSymbols></code>, <code><Optimize>false</Optimize></code></td></tr>
+<tr><td>Release</td><td>Manual (<code>-p:Configuration=Release</code>)</td><td>Production build with optimizations</td><td><code><Optimize>true</Optimize></code>, PDB-only symbols</td></tr>
+</tbody></table></div>
+<p>No Maven-style multi-profile setup. The project has two standard MSBuild configurations (Debug/Release) defined in the <code>.csproj</code>.</p>
+<h2 id="runtime-profiles">Runtime Profiles</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Profile</th><th>Activation Method</th><th>Config Files</th><th>Key Overrides</th>
+</tr></thead><tbody>
+<tr><td>Default</td><td>Always (single environment)</td><td>Web.config</td><td>No environment-specific overrides exist</td></tr>
+</tbody></table></div>
+<p>No <code>appsettings.Development.json</code>, <code>appsettings.Production.json</code>, or <code>application-{profile}.yml</code> equivalents. All environments share the same <code>Web.config</code>. There is no <code>ASPNETCORE_ENVIRONMENT</code> or <code>DOTNET_ENVIRONMENT</code> variable usage.</p>
+<h2 id="properties-inventory">Properties Inventory</h2>
+<h3 id="contosouniversity">ContosoUniversity</h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Property Key</th><th>Default Value</th><th>Profiles</th><th>Source</th>
+</tr></thead><tbody>
+<tr><td>ConnectionStrings:DefaultConnection</td><td><code>Data Source=(LocalDb)\MSSQLLocalDB;Initial Catalog=ContosoUniversityNoAuthEFCore;Integrated Security=True;MultipleActiveResultSets=True</code></td><td>All</td><td>Web.config <code><connectionStrings></code></td></tr>
+<tr><td>webpages:Version</td><td><code>3.0.0.0</code></td><td>All</td><td>Web.config <code><appSettings></code></td></tr>
+<tr><td>webpages:Enabled</td><td><code>false</code></td><td>All</td><td>Web.config <code><appSettings></code></td></tr>
+<tr><td>ClientValidationEnabled</td><td><code>true</code></td><td>All</td><td>Web.config <code><appSettings></code></td></tr>
+<tr><td>UnobtrusiveJavaScriptEnabled</td><td><code>true</code></td><td>All</td><td>Web.config <code><appSettings></code></td></tr>
+<tr><td>NotificationQueuePath</td><td><code>.\Private$\ContosoUniversityNotifications</code></td><td>All</td><td>Web.config <code><appSettings></code></td></tr>
+<tr><td>system.web/compilation/@debug</td><td><code>true</code></td><td>All</td><td>Web.config <code><system.web></code></td></tr>
+<tr><td>system.web/httpRuntime/@targetFramework</td><td><code>4.8</code></td><td>All</td><td>Web.config <code><system.web></code></td></tr>
+<tr><td>system.web/httpRuntime/@maxRequestLength</td><td><code>10240</code> (KB = 10 MB)</td><td>All</td><td>Web.config <code><system.web></code></td></tr>
+<tr><td>system.web/httpRuntime/@executionTimeout</td><td><code>3600</code> (seconds)</td><td>All</td><td>Web.config <code><system.web></code></td></tr>
+<tr><td>system.webServer/requestFiltering/maxAllowedContentLength</td><td><code>10485760</code> (bytes = 10 MB)</td><td>All</td><td>Web.config <code><system.webServer></code></td></tr>
+</tbody></table></div>
+<h2 id="startup-parameters-resource-requirements">Startup Parameters & Resource Requirements</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Service</th><th>Runtime Options</th><th>Memory</th><th>Instance Count</th>
+</tr></thead><tbody>
+<tr><td>ContosoUniversity (IIS Express)</td><td>.NET Framework 4.8 CLR, IIS Express w/ Windows Auth enabled</td><td>Not specified</td><td>1 (single IIS Express instance)</td></tr>
+</tbody></table></div>
+<p>No JVM heap settings (not Java). No Docker container resource limits. No Kubernetes resource requests/limits. IIS Express is used for local development only.</p>
+<h2 id="startup-dependency-chain">Startup Dependency Chain</h2>
+<ol>
+<li><strong>IIS Express starts</strong> → loads the ASP.NET MVC 5 application</li>
+<li><strong><code>MvcApplication.Application_Start()</code></strong> (Global.asax.cs) runs:</li>
+</ol>
+<ul>
+<li><code>AreaRegistration.RegisterAllAreas()</code></li>
+<li><code>FilterConfig.RegisterGlobalFilters()</code></li>
+<li><code>RouteConfig.RegisterRoutes()</code> (default route: <code>{controller}/{action}/{id}</code>)</li>
+<li><code>BundleConfig.RegisterBundles()</code> (jQuery, Bootstrap, Modernizr bundles)</li>
+<li><code>InitializeDatabase()</code> — reads connection string, creates <code>SchoolContext</code>, calls <code>DbInitializer.Initialize()</code> which calls <code>EnsureCreated()</code> and seeds data if empty</li>
+</ul>
+<ol>
+<li><strong>First HTTP request</strong> → controller instantiates <code>SchoolContextFactory.Create()</code> and <code>NotificationService()</code> (opens MSMQ queue)</li>
+</ol>
+<p>No explicit health checks, readiness probes, or wait-for mechanisms are configured.</p>
+<h2 id="secrets-sensitive-configuration">Secrets & Sensitive Configuration</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Secret Reference</th><th>Type</th><th>Storage</th>
+</tr></thead><tbody>
+<tr><td>ConnectionStrings:DefaultConnection</td><td>Database connection string</td><td>Web.config (plaintext) — uses Windows Integrated Security, no password</td></tr>
+<tr><td>NotificationQueuePath</td><td>MSMQ queue path</td><td>Web.config (plaintext) — local path, not a secret</td></tr>
+</tbody></table></div>
+<p>The database uses Windows Integrated Security (no password in the connection string). However, in a cloud deployment, a proper connection string with a service account password or managed identity would be required.</p>
+<h3 id="secrets-provisioning-workflow">Secrets Provisioning Workflow</h3>
+<p>No secrets provisioning workflow exists. All configuration is in the plaintext <code>Web.config</code> file checked into source control. There is no Key Vault integration, no environment variable substitution, and no encrypted properties. For cloud deployment, the connection string and any future API keys must be migrated to Azure Key Vault or environment variables, using managed identity authentication.</p>
+<h2 id="feature-flags">Feature Flags</h2>
+<p>No feature flag framework (LaunchDarkly, Unleash, .NET FeatureManagement) is used. No <code>[ConditionalOnProperty]</code> or custom toggle patterns are present.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Flag Name</th><th>Default</th><th>Controlled By</th>
+</tr></thead><tbody>
+<tr><td>webpages:Enabled</td><td>false</td><td>Web.config (disables WebMatrix WebPages)</td></tr>
+<tr><td>ClientValidationEnabled</td><td>true</td><td>Web.config (enables jQuery client-side validation)</td></tr>
+<tr><td>UnobtrusiveJavaScriptEnabled</td><td>true</td><td>Web.config (enables unobtrusive JS for validation)</td></tr>
+</tbody></table></div>
+<h2 id="framework-runtime-versions">Framework & Runtime Versions</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Component</th><th>Version</th><th>Source</th>
+</tr></thead><tbody>
+<tr><td>.NET Framework</td><td>4.8</td><td>ContosoUniversity.csproj <code><TargetFrameworkVersion>v4.8</TargetFrameworkVersion></code></td></tr>
+<tr><td>ASP.NET MVC</td><td>5.2.9</td><td>packages.config <code>Microsoft.AspNet.Mvc</code></td></tr>
+<tr><td>ASP.NET Razor</td><td>3.2.9</td><td>packages.config <code>Microsoft.AspNet.Razor</code></td></tr>
+<tr><td>ASP.NET WebPages</td><td>3.2.9</td><td>packages.config <code>Microsoft.AspNet.WebPages</code></td></tr>
+<tr><td>Entity Framework Core</td><td>3.1.32</td><td>packages.config <code>Microsoft.EntityFrameworkCore</code></td></tr>
+<tr><td>EF Core SQL Server Provider</td><td>3.1.32</td><td>packages.config <code>Microsoft.EntityFrameworkCore.SqlServer</code></td></tr>
+<tr><td>Microsoft.Data.SqlClient</td><td>2.1.4</td><td>packages.config</td></tr>
+<tr><td>Newtonsoft.Json</td><td>13.0.3</td><td>packages.config</td></tr>
+<tr><td>Bootstrap</td><td>5.3.3</td><td>packages.config</td></tr>
+<tr><td>jQuery</td><td>3.7.1</td><td>packages.config</td></tr>
+<tr><td>Microsoft.Identity.Client (MSAL)</td><td>4.21.1</td><td>packages.config</td></tr>
+<tr><td>MSBuild</td><td>15.0 (ToolsVersion)</td><td>ContosoUniversity.csproj</td></tr>
+<tr><td>NuGet</td><td>packages.config format</td><td>packages.config</td></tr>
+<tr><td>IIS Express</td><td>Local development</td><td>ContosoUniversity.csproj <code><UseIISExpress>true</UseIISExpress></code></td></tr>
+</tbody></table></div></div>
+</div>
+<div id="tab-workflows" class="tab-panel">
+  <div class="fact-content"><h1 id="core-business-workflows">Core Business Workflows</h1>
+<p>ContosoUniversity is a university administration web application that manages the academic lifecycle: students enroll in courses, instructors teach courses within departments, and all changes are tracked via an internal notification system.</p>
+<h2 id="domain-entities">Domain Entities</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Entity</th><th>Service / Bounded Context</th><th>Description</th><th>Key Relationships</th>
+</tr></thead><tbody>
+<tr><td>Student</td><td>Academic Records</td><td>A person enrolled at the university</td><td>Has many Enrollments; inherits from Person</td></tr>
+<tr><td>Instructor</td><td>Faculty Management</td><td>A person employed to teach courses</td><td>Has many CourseAssignments; may have one OfficeAssignment; inherits from Person</td></tr>
+<tr><td>Course</td><td>Curriculum Management</td><td>An academic course with title, credits, and department</td><td>Belongs to one Department; has many Enrollments; taught by many Instructors (via CourseAssignment)</td></tr>
+<tr><td>Department</td><td>Organizational</td><td>An academic department with budget and administrator</td><td>Administrated by one Instructor; contains many Courses</td></tr>
+<tr><td>Enrollment</td><td>Academic Records</td><td>Records a student's participation in a course with an optional grade</td><td>Belongs to Student and Course</td></tr>
+<tr><td>CourseAssignment</td><td>Faculty Management</td><td>Assigns an Instructor to teach a Course</td><td>Join entity for the many-to-many Instructor-Course relationship</td></tr>
+<tr><td>OfficeAssignment</td><td>Faculty Management</td><td>Records an Instructor's physical office location</td><td>One-to-one with Instructor</td></tr>
+<tr><td>Notification</td><td>System Operations</td><td>An audit record of entity changes (CREATE/UPDATE/DELETE)</td><td>Created by all business operations</td></tr>
+</tbody></table></div>
+<h2 id="service-to-domain-mapping">Service-to-Domain Mapping</h2>
+<p>This is a monolithic application — all domain entities are owned by a single deployable unit.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Service</th><th>Domain Context</th><th>Owned Entities</th><th>External Dependencies</th>
+</tr></thead><tbody>
+<tr><td>ContosoUniversity Web App</td><td>University Management (all)</td><td>Student, Instructor, Course, Department, Enrollment, CourseAssignment, OfficeAssignment, Notification</td><td>SQL Server LocalDB (EF Core), MSMQ (notifications)</td></tr>
+</tbody></table></div>
+<h2 id="primary-workflows">Primary Workflows</h2>
+<h3 id="workflow-1-student-enrollment-management">Workflow 1: Student Enrollment Management</h3>
+<p>A staff member navigates to the Students section to create, search, and manage student records.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>Staff navigates to <code>/Students</code> — paginated list is displayed (sorted by last name, page size 10)</li>
+<li>Staff can filter by name using the search box (<code>/Students?searchString=...</code>)</li>
+<li>Staff clicks <strong>Create</strong> → navigates to <code>/Students/Create</code></li>
+<li>Staff fills in LastName, FirstMidName, and EnrollmentDate; submits the form</li>
+<li>Server validates: <code>ModelState.IsValid</code>, <code>EnrollmentDate</code> is not <code>DateTime.MinValue</code></li>
+<li>If valid: <code>db.Students.Add(student)</code> → <code>SaveChanges()</code> → <code>SendEntityNotification("Student", id, CREATE)</code> → MSMQ message enqueued → redirect to list</li>
+<li>If invalid: form is returned with error messages</li>
+<li>Staff can view details, edit, or delete any student</li>
+</ol>
+<p><strong>Business rules involved:</strong></p>
+<ul>
+<li>EnrollmentDate must be a valid date (not default/min value)</li>
+<li>FirstName cannot exceed 50 characters</li>
+<li>LastName is required, max 50 characters</li>
+<li>Default EnrollmentDate pre-populated with today's date</li>
+</ul>
+<h3 id="workflow-2-course-management-with-file-upload">Workflow 2: Course Management with File Upload</h3>
+<p>Staff creates or edits a course and optionally uploads a teaching material image.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>Staff navigates to <code>/Courses/Create</code></li>
+<li>Staff fills in CourseID (manual, not auto-generated), Title, Credits, Department</li>
+<li>Staff optionally selects a teaching material image file</li>
+<li>Server validates:</li>
+</ol>
+<ul>
+<li><code>ModelState.IsValid</code> check</li>
+<li>File extension must be <code>.jpg</code>, <code>.jpeg</code>, <code>.png</code>, <code>.gif</code>, or <code>.bmp</code></li>
+<li>File size must be ≤ 5 MB</li>
+</ul>
+<ol>
+<li>If file provided and valid:</li>
+</ol>
+<ul>
+<li><code>Server.MapPath("~/Uploads/TeachingMaterials/")</code> resolves server path</li>
+<li>Directory is created if it does not exist</li>
+<li>File saved with name <code>course_{id}_{GUID}{ext}</code></li>
+<li>Path stored in <code>Course.TeachingMaterialImagePath</code></li>
+</ul>
+<ol>
+<li>Course saved to database, notification sent</li>
+</ol>
+<h3 id="workflow-3-instructor-management-with-course-assignment">Workflow 3: Instructor Management with Course Assignment</h3>
+<p>Staff manages instructor records and their teaching assignments.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>Staff navigates to <code>/Instructors/Create</code> or <code>/Instructors/Edit/{id}</code></li>
+<li>Staff fills in LastName, FirstMidName, HireDate</li>
+<li>Staff optionally assigns an office location (OfficeAssignment)</li>
+<li>Staff selects courses to assign via a checkbox list (<code>selectedCourses[]</code>)</li>
+<li>Server processes course assignments:</li>
+</ol>
+<ul>
+<li>For Create: creates new <code>CourseAssignment</code> records for each selected course</li>
+<li>For Edit: removes unselected assignments, adds new assignments (<code>UpdateInstructorCourses</code>)</li>
+</ul>
+<ol>
+<li>Instructor saved with all assignments</li>
+</ol>
+<h3 id="workflow-4-department-administration-with-concurrency-control">Workflow 4: Department Administration with Concurrency Control</h3>
+<p>Staff manages department budgets and instructor assignments, with optimistic concurrency.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>Staff opens Department Edit form (loads <code>RowVersion</code> as a hidden field)</li>
+<li>Staff updates Name, Budget, StartDate, or Administrator</li>
+<li>On save: EF Core sends UPDATE with WHERE <code>RowVersion = original_value</code></li>
+<li>If another user changed the record first → <code>DbUpdateConcurrencyException</code> is caught</li>
+<li>Conflicting values are fetched from the database and displayed to the user with instructions to retry</li>
+<li>If no conflict: change saved, notification sent</li>
+</ol>
+<h3 id="workflow-5-notification-polling">Workflow 5: Notification Polling</h3>
+<p>The UI polls for change events to alert users of recent operations.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>Browser loads any page with the notification bar (JavaScript timer starts)</li>
+<li>Every 30 seconds: <code>GET /Notifications/GetNotifications</code></li>
+<li>Server calls <code>NotificationService.ReceiveNotification()</code> in a loop (up to 10 messages, 1-second timeout each)</li>
+<li>Server returns JSON <code>{success, notifications[], count}</code></li>
+<li>JavaScript updates the notification badge count and list</li>
+</ol>
+<h2 id="cross-service-data-flows">Cross-Service Data Flows</h2>
+<p>This is a monolithic application — no cross-service data flows exist. All data is owned by the single <code>SchoolContext</code> and accessed within the same process. The only external data flow is:</p>
+<ul>
+<li><strong>Write path</strong>: MSMQ message sent after each CREATE/UPDATE/DELETE operation</li>
+<li><strong>Read path</strong>: MSMQ message consumed on-demand via the notification polling endpoint</li>
+</ul>
+<h2 id="business-workflow-sequence">Business Workflow Sequence</h2>
+<div class="mermaid">
+sequenceDiagram
+    participant Staff as "Staff (Browser)"
+    participant MVC as "MVC Controller"
+    participant Validator as "ModelState"
+    participant EF as "SchoolContext"
+    participant DB as "SQL Server"
+    participant NotifSvc as "NotificationService"
+    participant MSMQ as "MSMQ Queue"
+
+    Staff->>MVC: POST /Students/Create (form data)
+    MVC->>Validator: Validate model binding
+    alt Model is valid and date is not default
+        MVC->>EF: db.Students.Add(student)
+        EF->>DB: INSERT INTO Person (Student)
+        DB-->>EF: Row inserted
+        EF->>DB: SaveChanges
+        DB-->>EF: Committed
+        EF-->>MVC: Success
+        MVC->>NotifSvc: SendNotification(Student, id, CREATE)
+        NotifSvc->>MSMQ: Queue.Send(JSON notification)
+        MSMQ-->>NotifSvc: Enqueued
+        MVC-->>Staff: 302 Redirect to /Students
+    else Validation failed
+        MVC-->>Staff: 200 View with validation errors
+    end
+
+    Note over Staff,MSMQ: Concurrent notification polling
+    Staff->>MVC: GET /Notifications/GetNotifications
+    MVC->>NotifSvc: ReceiveNotification loop (max 10)
+    NotifSvc->>MSMQ: Queue.Receive (1s timeout)
+    MSMQ-->>NotifSvc: Notification message
+    MVC-->>Staff: JSON response with notifications
+</div>
+<h2 id="business-rules-decision-logic">Business Rules & Decision Logic</h2>
+<h3 id="validation-rules">Validation Rules</h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Entity</th><th>Field</th><th>Rule</th>
+</tr></thead><tbody>
+<tr><td>Student</td><td>EnrollmentDate</td><td>Required; must not be <code>DateTime.MinValue</code>; must be between 1753-01-01 and 9999-12-31</td></tr>
+<tr><td>Student</td><td>LastName</td><td>Required, max 50 characters</td></tr>
+<tr><td>Student</td><td>FirstMidName</td><td>Required, max 50 characters</td></tr>
+<tr><td>Instructor</td><td>HireDate</td><td>Required; must be between 1753-01-01 and 9999-12-31</td></tr>
+<tr><td>Instructor</td><td>LastName, FirstMidName</td><td>Required, max 50 characters</td></tr>
+<tr><td>Course</td><td>Title</td><td>Required, 3–50 characters</td></tr>
+<tr><td>Course</td><td>Credits</td><td>Required, range 0–5</td></tr>
+<tr><td>Course</td><td>CourseID</td><td>Manual entry (no auto-generation); no range validation</td></tr>
+<tr><td>Course</td><td>TeachingMaterialImagePath</td><td>Optional; if provided, must be max 255 characters</td></tr>
+<tr><td>Course (upload)</td><td>File extension</td><td>Must be <code>.jpg</code>, <code>.jpeg</code>, <code>.png</code>, <code>.gif</code>, or <code>.bmp</code></td></tr>
+<tr><td>Course (upload)</td><td>File size</td><td>Must be ≤ 5 MB (5 × 1024 × 1024 bytes)</td></tr>
+<tr><td>Department</td><td>Name</td><td>Required, 3–50 characters</td></tr>
+<tr><td>Department</td><td>Budget</td><td>Currency type; no explicit range validation</td></tr>
+<tr><td>Department</td><td>RowVersion</td><td>Optimistic concurrency token — mismatch triggers conflict resolution flow</td></tr>
+<tr><td>Notification</td><td>EntityType</td><td>Required, max 100 characters</td></tr>
+<tr><td>Notification</td><td>Message</td><td>Required, max 256 characters</td></tr>
+</tbody></table></div>
+<h3 id="decision-logic">Decision Logic</h3>
+<ul>
+<li><strong>Instructor course assignment (Edit)</strong>: The <code>UpdateInstructorCourses</code> helper compares the submitted <code>selectedCourses[]</code> array against the instructor's existing <code>CourseAssignments</code> collection and adds/removes entries to match.</li>
+<li><strong>Student search</strong>: Case-insensitive <code>Contains()</code> filter on <code>LastName</code> OR <code>FirstMidName</code> fields.</li>
+<li><strong>Pagination reset</strong>: If a new search string is provided, the page number resets to 1.</li>
+<li><strong>Grade display</strong>: <code>Grade?</code> is nullable; <code>[DisplayFormat(NullDisplayText = "No grade")]</code> renders "No grade" for null values.</li>
+</ul>
+<h3 id="transactions">Transactions</h3>
+<p>All database mutations use the default EF Core transaction scope — each <code>SaveChanges()</code> call is wrapped in an implicit transaction. No explicit <code>TransactionScope</code>, distributed transactions, or saga patterns are used.</p>
+<h3 id="error-handling">Error Handling</h3>
+<ul>
+<li><strong>MSMQ send failure</strong>: Caught silently with <code>Debug.WriteLine</code>; the main operation is not interrupted.</li>
+<li><strong>Concurrency conflict (Department)</strong>: <code>DbUpdateConcurrencyException</code> is caught and re-presented to the user with both current and proposed values.</li>
+<li><strong>File upload error</strong>: Caught and surfaced as a <code>ModelState</code> error on the <code>teachingMaterialImage</code> field.</li>
+<li><strong>Notification receive timeout</strong>: <code>MessageQueueException</code> with <code>IOTimeout</code> error code is caught and returns <code>null</code> (no message available).</li>
+</ul>
+<h3 id="authorization">Authorization</h3>
+<p>No authentication or role-based authorization is implemented. Code comments in several controller actions reference intended roles (e.g., "Admins and Teachers can view") but no <code>[Authorize]</code> attributes or claims-based checks are applied.</p></div>
+</div>
+<div id="tab-deps" class="tab-panel">
+  <div class="fact-content"><h1 id="dependency-map">Dependency Map</h1>
+<p>ContosoUniversity declares 44 NuGet packages (via packages.config) targeting .NET Framework 4.8, centered on ASP.NET MVC 5, Entity Framework Core 3.1, and Windows-specific messaging (System.Messaging via MSMQ).</p>
+<h2 id="dependencies">Dependencies</h2>
+<div class="mermaid">
+flowchart LR
+    App["ContosoUniversity"]
+
+    subgraph Web["Web Frameworks"]
+        ASPNETMVC["ASP.NET MVC v5.2.9"]
+        Razor["ASP.NET Razor v3.2.9"]
+        WebPages["ASP.NET WebPages v3.2.9"]
+        WebOpt["Web.Optimization v1.1.3"]
+        Bootstrap["Bootstrap v5.3.3"]
+        jQuery["jQuery v3.7.1"]
+        jQueryVal["jQuery Validation v1.21.0"]
+    end
+
+    subgraph DB["Database / ORM"]
+        EFCore["EF Core v3.1.32"]
+        EFCoreSqlSvr["EF Core SqlServer v3.1.32"]
+        EFCoreRelational["EF Core Relational v3.1.32"]
+        EFCoreTools["EF Core Tools v3.1.32"]
+        SqlClient["Microsoft.Data.SqlClient v2.1.4"]
+    end
+
+    subgraph DI["Dependency Injection"]
+        MSDI["MS Extensions DI v3.1.32"]
+        MSDIAbstr["MS Extensions DI Abstractions v3.1.32"]
+    end
+
+    subgraph Log["Logging"]
+        MSLogging["MS Extensions Logging v3.1.32"]
+        MSLoggingAbstr["MS Extensions Logging Abstractions v3.1.32"]
+    end
+
+    subgraph Cache["Caching"]
+        MSCache["MS Extensions Caching Memory v3.1.32"]
+        MSCacheAbstr["MS Extensions Caching Abstractions v3.1.32"]
+    end
+
+    subgraph Sec["Security"]
+        MSAL["Microsoft.Identity.Client v4.21.1"]
+    end
+
+    subgraph Util["Utilities"]
+        NewtonsoftJson["Newtonsoft.Json v13.0.3"]
+        SysCompAnnot["System.ComponentModel.Annotations v4.7.0"]
+        SysMemory["System.Memory v4.5.4"]
+        Antlr["Antlr v3.4.1.9004"]
+        WebGrease["WebGrease v1.5.2"]
+        CodeDom["CodeDom.Providers.DotNetCompilerPlatform v2.0.1"]
+        WebInfra["Microsoft.Web.Infrastructure v2.0.1"]
+    end
+
+    App -->|"web"| Web
+    App -->|"persistence"| DB
+    App -->|"DI"| DI
+    App -->|"logging"| Log
+    App -->|"caching"| Cache
+    App -->|"security"| Sec
+    App -->|"utilities"| Util
+    EFCore -.->|"requires"| MSDI
+    EFCore -.->|"requires"| MSLogging
+</div>
+<h3 id="dependency-summary">Dependency Summary</h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Category</th><th>Count</th><th>Key Libraries</th><th>Notes</th>
+</tr></thead><tbody>
+<tr><td>Web Frameworks</td><td>7</td><td>ASP.NET MVC 5.2.9, Razor 3.2.9, Bootstrap 5.3.3, jQuery 3.7.1</td><td>Legacy System.Web-based MVC stack on .NET Framework</td></tr>
+<tr><td>Database / ORM</td><td>5</td><td>EF Core 3.1.32, EF Core SqlServer 3.1.32, Microsoft.Data.SqlClient 2.1.4</td><td>EF Core 3.1 is end-of-life (support ended Dec 2022)</td></tr>
+<tr><td>Dependency Injection</td><td>2</td><td>Microsoft.Extensions.DependencyInjection 3.1.32</td><td>Not used as IoC container; DI is manual via constructors</td></tr>
+<tr><td>Logging</td><td>2</td><td>Microsoft.Extensions.Logging 3.1.32</td><td>Logging abstractions present but no concrete provider wired</td></tr>
+<tr><td>Caching</td><td>2</td><td>Microsoft.Extensions.Caching.Memory 3.1.32</td><td>Caching assemblies referenced but not actively used in code</td></tr>
+<tr><td>Security</td><td>1</td><td>Microsoft.Identity.Client 4.21.1</td><td>MSAL library present but authentication not implemented</td></tr>
+<tr><td>Utilities</td><td>7</td><td>Newtonsoft.Json 13.0.3, System.ComponentModel.Annotations 4.7.0, Antlr 3.4.1</td><td>Mixed bag of runtime and tooling utilities</td></tr>
+</tbody></table></div>
+<h3 id="version-compatibility-risks">Version & Compatibility Risks</h3>
+<p>The most significant risk is the entire stack targeting <strong>.NET Framework 4.8</strong> — a maintenance-mode runtime that is Windows-only and cannot be containerized on Linux. <strong>Entity Framework Core 3.1</strong> reached end-of-life in December 2022 and must be upgraded to EF Core 8+ for cloud migrations. <strong>ASP.NET MVC 5.2.9</strong> is a System.Web-based framework that has no direct equivalent in .NET Core/5+; migration requires rewriting controllers using ASP.NET Core MVC. <strong>System.Messaging</strong> (MSMQ, used implicitly via NotificationService) is not declared in packages.config because it ships with Windows; it is unavailable on Linux or in Azure App Service without a complete messaging replacement. <strong>Microsoft.Identity.Client 4.21.1</strong> is present but authentication is not implemented — this will need to be properly wired before cloud deployment.</p>
+<h3 id="notable-observations">Notable Observations</h3>
+<ul>
+<li><strong>MSMQ dependency not in packages.config</strong>: <code>System.Messaging</code> is consumed directly from the Windows GAC (Global Assembly Cache), making the dependency invisible to NuGet tooling. This creates an undeclared Windows-only runtime requirement.</li>
+<li><strong>EF Core 3.1 in a .NET Framework project</strong>: Mixing EF Core (a cross-platform ORM) with the legacy ASP.NET stack is unusual. The ORM upgrade path to EF Core 8+ is relatively straightforward, but it requires the overall project to migrate to ASP.NET Core first.</li>
+<li><strong>Microsoft.Identity.Client present but unused</strong>: MSAL is listed in packages.config but there is no authentication/authorization code in any controller or startup class, suggesting authentication was planned but not implemented.</li>
+<li><strong>CSS/JS bundles</strong>: Bootstrap 5.3.3 and jQuery 3.7.1 are delivered as NuGet packages and bundled via System.Web.Optimization — an approach that will not work in ASP.NET Core where npm/CDN is preferred.</li>
+</ul>
+<h2 id="test-dependencies">Test Dependencies</h2>
+<p>No test projects or test-scoped dependencies were detected in this repository.</p>
+<p>Total test-scope dependencies: 0</p>
+<p>No unit test or integration test projects were found. Adding a test project with xUnit/MSTest and EF Core in-memory provider is recommended before migration.</p></div>
+</div>
+<div id="tab-data" class="tab-panel">
+  <div class="fact-content"><h1 id="data-architecture-persistence-layer">Data Architecture & Persistence Layer</h1>
+<p>ContosoUniversity uses a single SQL Server LocalDB instance with 9 mapped entities accessed through Entity Framework Core 3.1, using Table-per-Hierarchy inheritance for the Person hierarchy and a composite primary key for the CourseAssignment join table.</p>
+<h2 id="database-configuration">Database Configuration</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Service/Module</th><th>DB Type</th><th>Profile</th><th>Driver</th><th>Connection</th><th>Migration Tool</th>
+</tr></thead><tbody>
+<tr><td>ContosoUniversity</td><td>SQL Server LocalDB</td><td>Default (all environments)</td><td>Microsoft.Data.SqlClient 2.1.4</td><td>Data Source=(LocalDb)\MSSQLLocalDB; Initial Catalog=ContosoUniversityNoAuthEFCore; Integrated Security=True; MultipleActiveResultSets=True</td><td>EF Core EnsureCreated + DbInitializer seed</td></tr>
+</tbody></table></div>
+<p>Schema management: <code>Database.EnsureCreated()</code> is called at startup via <code>DbInitializer.Initialize()</code>. EF Core manages schema creation; there are no Flyway/Liquibase migration files. Seed data is inserted programmatically if the <code>Students</code> table is empty. Connection string is read from <code>Web.config</code> via <code>ConfigurationManager</code>. See <code>configuration-inventory.md</code> for property key details.</p>
+<h2 id="data-ownership-per-service">Data Ownership per Service</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>Service</th><th>Tables Owned</th><th>ORM Framework</th><th>Caching</th><th>Notes</th>
+</tr></thead><tbody>
+<tr><td>ContosoUniversity</td><td>Person, Course, Department, Enrollment, CourseAssignment, OfficeAssignment, Notification</td><td>Entity Framework Core 3.1</td><td>None</td><td>Single shared database; EnsureCreated for schema; seed data via DbInitializer</td></tr>
+</tbody></table></div>
+<h2 id="entity-model">Entity Model</h2>
+<div class="mermaid">
+erDiagram
+    Person ||--o{ Enrollment : "enrolls in"
+    Person ||--o| OfficeAssignment : "may have"
+    Person ||--o{ CourseAssignment : "may teach"
+    Course ||--o{ Enrollment : "has"
+    Course ||--o{ CourseAssignment : "assigned to"
+    Course }o--|| Department : "belongs to"
+    Department }o--o| Person : "administered by"
+
+    Person {
+        int ID PK
+        string LastName
+        string FirstMidName
+        string Discriminator
+    }
+    Course {
+        int CourseID PK
+        string Title
+        int Credits
+        int DepartmentID FK
+        string TeachingMaterialImagePath
+    }
+    Department {
+        int DepartmentID PK
+        string Name
+        decimal Budget
+        datetime StartDate
+        int InstructorID FK
+        bytes RowVersion
+    }
+    Enrollment {
+        int EnrollmentID PK
+        int CourseID FK
+        int StudentID FK
+        string Grade
+    }
+    CourseAssignment {
+        int CourseID PK
+        int InstructorID PK
+    }
+    OfficeAssignment {
+        int InstructorID PK
+        string Location
+    }
+    Notification {
+        int Id PK
+        string EntityType
+        string EntityId
+        string Operation
+        string Message
+        datetime CreatedAt
+        string CreatedBy
+        bool IsRead
+        datetime ReadAt
+    }
+</div>
+<p><strong>Notes on inheritance:</strong></p>
+<ul>
+<li><code>Student</code> and <code>Instructor</code> both extend the abstract <code>Person</code> entity (TPH). <code>Student</code> adds <code>EnrollmentDate</code>; <code>Instructor</code> adds <code>HireDate</code>. Both map to the <code>Person</code> table with a <code>Discriminator</code> column.</li>
+<li><code>CourseAssignment</code> has a composite PK (<code>CourseID</code> + <code>InstructorID</code>).</li>
+<li><code>OfficeAssignment</code> uses the shared PK pattern (<code>InstructorID</code> is both PK and FK).</li>
+</ul>
+<h2 id="key-repository-methods">Key Repository Methods</h2>
+<p>All data access is performed directly through <code>SchoolContext</code> (EF Core DbContext) in the controllers — there is no separate repository interface layer.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Context</th><th>DbSet</th><th>Notable Access Patterns</th><th>Purpose</th>
+</tr></thead><tbody>
+<tr><td>SchoolContext</td><td>Students</td><td><code>.Include(s => s.Enrollments).ThenInclude(e => e.Course)</code></td><td>Load student with full enrollment history</td></tr>
+<tr><td>SchoolContext</td><td>Students</td><td>`.Where(s => s.LastName.Contains(q) \</td><td>\</td><td>s.FirstMidName.Contains(q))`</td><td>Full-name search</td></tr>
+<tr><td>SchoolContext</td><td>Students</td><td><code>PaginatedList<Student>.Create(query, page, pageSize)</code></td><td>Server-side pagination (page size = 10)</td></tr>
+<tr><td>SchoolContext</td><td>Courses</td><td><code>.Include(c => c.Department)</code></td><td>Eager-load department for course list</td></tr>
+<tr><td>SchoolContext</td><td>Instructors</td><td><code>.Include(i => i.OfficeAssignment).Include(i => i.CourseAssignments).ThenInclude(c => c.Course).ThenInclude(d => d.Department)</code></td><td>Deep-load instructor with office, courses, and departments</td></tr>
+<tr><td>SchoolContext</td><td>Departments</td><td><code>.Include(d => d.Administrator)</code></td><td>Load department with assigned administrator</td></tr>
+<tr><td>SchoolContext</td><td>Enrollments</td><td>Direct query in instructor index for selected course</td><td>Load enrollments for a specific course</td></tr>
+<tr><td>SchoolContext</td><td>Notifications</td><td>Saved indirectly via NotificationService; read via NotificationsController</td><td>Notification persistence</td></tr>
+</tbody></table></div>
+<p><code>PaginatedList<T></code> is a helper class (<code>PaginatedList.cs</code>) that wraps an <code>IQueryable<T></code> and calculates page boundaries. It calls <code>.Count()</code> and <code>.Skip().Take()</code> to paginate server-side.</p>
+<h2 id="caching-strategy">Caching Strategy</h2>
+<p>No caching layer is configured or used in this application. While <code>Microsoft.Extensions.Caching.Memory</code> (v3.1.32) is referenced in <code>packages.config</code>, there are no <code>IMemoryCache</code> injections, <code>[ResponseCache]</code> attributes, or cache-related configuration in any controller or service. All database queries execute on every request without result caching.</p>
+<h2 id="data-ownership-boundaries">Data Ownership Boundaries</h2>
+<p><strong>Shared data store:</strong> The entire application uses a single shared SQL Server LocalDB database. There is no database-per-service or logical schema separation.</p>
+<p><strong>Cross-service access:</strong> N/A — this is a monolithic application. All entities are accessed by all controllers through the single <code>SchoolContext</code> instance created per-request via <code>SchoolContextFactory.Create()</code>.</p>
+<p><strong>Read/write patterns:</strong> Predominantly read-heavy (list/detail views) with full CRUD operations on all entities. Optimistic concurrency is implemented only for <code>Department</code> via the <code>RowVersion</code> byte array (<code>[Timestamp]</code> attribute) — a <code>DbUpdateConcurrencyException</code> is caught in the Edit action and surfaced to the user.</p>
+<h3 id="data-classification-sensitivity">Data Classification & Sensitivity</h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Entity</th><th>Sensitive Fields</th><th>Classification</th><th>Controls in Place</th>
+</tr></thead><tbody>
+<tr><td>Person (Student/Instructor)</td><td>LastName, FirstMidName</td><td>PII (personal name)</td><td>None — no encryption-at-rest, no masking, no field-level access control</td></tr>
+<tr><td>Student</td><td>EnrollmentDate</td><td>PII (educational record)</td><td>None</td></tr>
+<tr><td>Instructor</td><td>HireDate</td><td>PII (employment record)</td><td>None</td></tr>
+<tr><td>OfficeAssignment</td><td>Location</td><td>Internal only</td><td>None</td></tr>
+<tr><td>Department</td><td>Budget, StartDate</td><td>Internal financial</td><td>None</td></tr>
+<tr><td>Enrollment</td><td>Grade</td><td>PII (educational record / FERPA)</td><td>None — grades stored in plaintext with no access control</td></tr>
+<tr><td>Notification</td><td>Message, CreatedBy</td><td>Internal audit</td><td>None</td></tr>
+</tbody></table></div>
+<p>No encryption-at-rest, data masking, field-level access controls, or audit logging are configured. Student grades and personally identifiable information (names, enrollment dates, hire dates) are stored in plaintext in a local development database. Before cloud deployment, PII/FERPA compliance controls should be evaluated and implemented.</p></div>
+</div>
+<p class="footer">Your feedback is invaluable &mdash; <a href="https://aka.ms/ghcp-appmod/feedback">Share feedback</a></p>
+<script>
+function toggleRow(rowId, triggerRow) {
+  var detail = document.getElementById(rowId);
+  var btn = document.getElementById('btn-' + rowId);
+  if (!detail) return;
+  var visible = detail.style.display !== 'none';
+  detail.style.display = visible ? 'none' : 'table-row';
+  if (btn) btn.classList.toggle('open', !visible);
+}
+(function() {
+  var nav = document.querySelector('.tab-nav');
+  if (!nav) return;
+  nav.addEventListener('click', function(e) {
+    var btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    var targetId = btn.getAttribute('data-tab');
+    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+    var panel = document.getElementById(targetId);
+    if (panel) {
+      panel.classList.add('active');
+      if (window.__mermaidReady) { window.__renderMermaidIn(panel); }
+    }
+  });
+})();
+
+// ── Diagram lightbox ────────────────────────────────────────
+(function() {
+  var lightbox = document.getElementById('diagram-lightbox');
+  var inner = document.getElementById('diagram-lightbox-inner');
+  var closeBtn = document.getElementById('diagram-lightbox-close');
+  if (!lightbox || !inner || !closeBtn) return;
+
+  var scale = 1;
+  var translateX = 0;
+  var translateY = 0;
+  var isDragging = false;
+  var dragStartX = 0;
+  var dragStartY = 0;
+
+  function applyTransform() {
+    var svg = inner.querySelector('svg');
+    if (svg) {
+      svg.style.transform = 'translate(' + translateX + 'px, ' + translateY + 'px) scale(' + scale + ')';
+      svg.style.transformOrigin = 'center center';
+      svg.style.transition = 'none';
+    }
+  }
+
+  function resetTransform() {
+    scale = 1; translateX = 0; translateY = 0;
+    applyTransform();
+  }
+
+  function openLightbox(svgEl) {
+    inner.innerHTML = svgEl.outerHTML;
+    var injected = inner.querySelector('svg');
+    if (injected) {
+      injected.removeAttribute('width');
+      injected.removeAttribute('height');
+      injected.style.cursor = 'grab';
+    }
+    resetTransform();
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    inner.innerHTML = '';
+    document.body.style.overflow = '';
+    resetTransform();
+  }
+
+  inner.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    var delta = e.deltaY > 0 ? 0.9 : 1.1;
+    scale = Math.min(Math.max(scale * delta, 0.3), 8);
+    applyTransform();
+  }, { passive: false });
+
+  inner.addEventListener('mousedown', function(e) {
+    if (e.button !== 0) return;
+    isDragging = true;
+    dragStartX = e.clientX - translateX;
+    dragStartY = e.clientY - translateY;
+    var svg = inner.querySelector('svg');
+    if (svg) { svg.style.cursor = 'grabbing'; }
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+    translateX = e.clientX - dragStartX;
+    translateY = e.clientY - dragStartY;
+    applyTransform();
+  });
+
+  document.addEventListener('mouseup', function() {
+    if (!isDragging) return;
+    isDragging = false;
+    var svg = inner.querySelector('svg');
+    if (svg) { svg.style.cursor = 'grab'; }
+  });
+
+  inner.addEventListener('dblclick', function() { resetTransform(); });
+
+  document.addEventListener('click', function(e) {
+    var card = e.target.closest('.mermaid');
+    if (!card) return;
+    if (e.target.closest('.diagram-lightbox-close')) return;
+    var svg = card.querySelector('svg');
+    if (svg) { openLightbox(svg); }
+  });
+
+  closeBtn.addEventListener('click', closeLightbox);
+
+  lightbox.addEventListener('click', function(e) {
+    if (e.target === lightbox) { closeLightbox(); }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeLightbox(); }
+  });
+})();
+
+var _currentTarget = '';
+
+function toggleMultiSelect(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  document.querySelectorAll('.multi-select.open').forEach(function(ms) { if (ms.id !== id) ms.classList.remove('open'); });
+  el.classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.multi-select')) {
+    document.querySelectorAll('.multi-select.open').forEach(function(ms) { ms.classList.remove('open'); });
+  }
+});
+
+function getMultiSelectValues(msId) {
+  var el = document.getElementById(msId);
+  if (!el) return [];
+  var checked = el.querySelectorAll('input[type=checkbox]:checked');
+  var vals = [];
+  for (var i = 0; i < checked.length; i++) vals.push(checked[i].value);
+  return vals;
+}
+
+function onMultiSelectChange(msId, label) {
+  var el = document.getElementById(msId);
+  if (!el) return;
+  var vals = getMultiSelectValues(msId);
+  var total = el.querySelectorAll('input[type=checkbox]').length;
+  var btn = el.querySelector('.multi-select-btn');
+  if (btn) {
+    btn.textContent = vals.length > 0 && vals.length < total ? label + ' (' + vals.length + ')' : label;
+  }
+  applyFilters();
+}
+
+function applyFilters() {
+  var selectedDomains = getMultiSelectValues('domain-ms');
+  var selectedCrits = getMultiSelectValues('criticality-ms');
+
+  var sections = document.querySelectorAll('.issue-section');
+  for (var i = 0; i < sections.length; i++) {
+    var domain = sections[i].getAttribute('data-domain');
+    sections[i].style.display = (selectedDomains.length === 0 || selectedDomains.indexOf(domain) >= 0) ? '' : 'none';
+  }
+
+  var rows = document.querySelectorAll('.issue-row');
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    var section = row.closest('.issue-section');
+    if (section && section.style.display === 'none') {
+      row.style.display = 'none';
+      var next = row.nextElementSibling;
+      if (next && next.classList.contains('detail-row')) next.style.display = 'none';
+      continue;
+    }
+
+    var show = true;
+    if (_currentTarget && row.hasAttribute('data-targets')) {
+      var targetsStr = row.getAttribute('data-targets');
+      if (targetsStr && targetsStr !== '{}') {
+        try {
+          var targets = JSON.parse(targetsStr);
+          if (Object.keys(targets).length > 0 && !targets[_currentTarget]) {
+            show = false;
+          }
+        } catch(e) {}
+      }
+    }
+
+    if (show && selectedCrits.length > 0) {
+      var crit = row.getAttribute('data-criticality');
+      if (selectedCrits.indexOf(crit) < 0) show = false;
+    }
+
+    row.style.display = show ? '' : 'none';
+    var nextRow = row.nextElementSibling;
+    if (nextRow && nextRow.classList.contains('detail-row')) {
+      if (!show) nextRow.style.display = 'none';
+    }
+  }
+}
+
+function clearAllFilters() {
+  document.querySelectorAll('.multi-select input[type=checkbox]').forEach(function(cb) { cb.checked = false; });
+  var domainBtn = document.querySelector('#domain-ms .multi-select-btn');
+  if (domainBtn) domainBtn.textContent = 'Domain';
+  var critBtn = document.querySelector('#criticality-ms .multi-select-btn');
+  if (critBtn) critBtn.textContent = 'Criticality';
+  applyFilters();
+}
+
+function onTargetChange(targetId) {
+  _currentTarget = targetId;
+  var rows = document.querySelectorAll('.issue-row[data-targets]');
+  var totalEffort = 0;
+  var domainCrits = {};
+
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    var targets = JSON.parse(row.getAttribute('data-targets'));
+    var section = row.closest('.issue-section');
+    var domain = section ? section.getAttribute('data-domain') : '';
+
+    if (!targets || Object.keys(targets).length === 0) {
+      var sp = parseFloat(row.querySelector('.sp-cell').textContent) || 0;
+      totalEffort += sp;
+      if (!domainCrits[domain]) domainCrits[domain] = {mandatory:0,potential:0,optional:0};
+      var crit = row.getAttribute('data-criticality') || 'optional';
+      domainCrits[domain][crit] = (domainCrits[domain][crit] || 0) + 1;
+      continue;
+    }
+
+    var override = targets[targetId];
+    if (!override) {
+      continue;
+    }
+
+    var newSeverity = (override.severity || row.getAttribute('data-default-severity') || '').toLowerCase();
+    row.setAttribute('data-criticality', newSeverity);
+    var critCell = row.querySelector('.crit-cell');
+    if (critCell) {
+      var critText = newSeverity === 'mandatory' ? 'Mandatory' : newSeverity === 'potential' ? 'Potential' : 'Optional';
+      var cssClass = newSeverity === 'mandatory' ? 'crit-square-mandatory' : newSeverity === 'potential' ? 'crit-square-potential' : 'crit-square-optional';
+      critCell.innerHTML = '<span class="crit-label"><span class="crit-square ' + cssClass + '"></span>' + critText + '</span>';
+    }
+
+    var newEffort = override.effort !== undefined ? override.effort : parseFloat(row.getAttribute('data-default-effort')) || 0;
+    var spCell = row.querySelector('.sp-cell');
+    if (spCell) spCell.textContent = newEffort;
+    totalEffort += newEffort;
+
+    if (!domainCrits[domain]) domainCrits[domain] = {mandatory:0,potential:0,optional:0};
+    domainCrits[domain][newSeverity] = (domainCrits[domain][newSeverity] || 0) + 1;
+  }
+
+  var secSection = document.querySelector('.issue-section[data-domain="security"]');
+  if (secSection) {
+    var secRows = secSection.querySelectorAll('.issue-row');
+    for (var j = 0; j < secRows.length; j++) {
+      if (!secRows[j].hasAttribute('data-targets') || secRows[j].getAttribute('data-targets') === '') {
+        var sp = parseFloat(secRows[j].querySelector('.sp-cell').textContent) || 0;
+        totalEffort += sp;
+        if (!domainCrits['security']) domainCrits['security'] = {mandatory:0,potential:0,optional:0};
+        var sc = secRows[j].getAttribute('data-criticality') || 'optional';
+        domainCrits['security'][sc] = (domainCrits['security'][sc] || 0) + 1;
+      }
+    }
+  }
+
+  var label = totalEffort < 20 ? 'S' : totalEffort < 50 ? 'M' : totalEffort < 100 ? 'L' : 'XL';
+  var effortEl = document.getElementById('effort-display');
+  if (effortEl) effortEl.textContent = label + ' (total story points: ' + totalEffort + ')';
+
+  updateDonuts(domainCrits);
+  applyFilters();
+}
+
+function updateDonuts(domainCrits) {
+  var container = document.getElementById('donut-container');
+  if (!container) return;
+  container.innerHTML = '';
+  var domainNames = {'cloud-readiness':'Cloud Readiness','java-upgrade':'Java Upgrade','dotnet-upgrade':'DotNET Upgrade','security':'Security'};
+  var domainOrder = ['cloud-readiness','java-upgrade','dotnet-upgrade','security'];
+  for (var d = 0; d < domainOrder.length; d++) {
+    var key = domainOrder[d];
+    var c = domainCrits[key];
+    if (!c || (c.mandatory + c.potential + c.optional) === 0) continue;
+    var total = c.mandatory + c.potential + c.optional;
+    var div = document.createElement('div');
+    div.className = 'domain-summary-item';
+    div.innerHTML = buildDonutSvg(c.mandatory, c.potential, c.optional) +
+      '<h3>' + domainNames[key] + '</h3>' +
+      '<div class="count">' + total + ' issue' + (total !== 1 ? 's' : '') + '</div>';
+    container.appendChild(div);
+  }
+}
+
+function buildDonutSvg(m, p, o) {
+  var total = m + p + o;
+  if (total === 0) return '<svg viewBox="0 0 100 100" width="100" height="100" style="display:block;margin:0 auto;"><circle cx="50" cy="50" r="35" fill="none" stroke="#d0d7de" stroke-width="15" opacity="0.5"/></svg>';
+  var r = 35, circ = 2 * Math.PI * r, offset = 0;
+  var svg = '<svg viewBox="0 0 100 100" width="100" height="100" style="display:block;margin:0 auto;transform:rotate(-90deg);">';
+  var segs = [{c:m,color:'var(--color-mandatory)'},{c:p,color:'var(--color-potential)'},{c:o,color:'var(--color-optional)'}];
+  for (var i = 0; i < segs.length; i++) {
+    if (segs[i].c === 0) continue;
+    var segLen = (segs[i].c / total) * circ;
+    var gap = total > segs[i].c ? 1.5 : 0;
+    var drawLen = Math.max(segLen - gap, 0.5);
+    svg += '<circle cx="50" cy="50" r="' + r + '" fill="none" stroke="' + segs[i].color + '" stroke-width="15" stroke-dasharray="' + drawLen.toFixed(2) + ' ' + circ.toFixed(2) + '" stroke-dashoffset="' + (-offset).toFixed(2) + '"/>';
+    offset += segLen;
+  }
+  svg += '</svg>';
+  return svg;
+}
+</script>
+</div></body></html>

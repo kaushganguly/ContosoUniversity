@@ -1,0 +1,179 @@
+{
+  "metadata": {
+    "targetFramework": "net10.0",
+    "assessmentDate": "2026-07-16T01:15:35Z",
+    "sourceFramework": ".NET Framework 4.8"
+  },
+  "rules": {
+    "UA-001": {
+      "label": "ASP.NET MVC 5 (System.Web) requires migration to ASP.NET Core MVC",
+      "severity": "mandatory",
+      "effort": 40,
+      "description": "ASP.NET MVC 5 is built on System.Web which does not exist in .NET Core or .NET 5+. The entire web framework layer must be rewritten using ASP.NET Core MVC controllers, Razor views, and middleware pipeline."
+    },
+    "UA-002": {
+      "label": "System.Web namespace not available in .NET 10",
+      "severity": "mandatory",
+      "effort": 20,
+      "description": "All types from System.Web (HttpContext, HttpRequest, HttpResponse, HttpPostedFileBase, HttpServerUtility, etc.) are not available in .NET 10. Replace with Microsoft.AspNetCore.Http equivalents."
+    },
+    "UA-003": {
+      "label": "Global.asax application lifecycle must be migrated",
+      "severity": "mandatory",
+      "effort": 5,
+      "description": "Global.asax and Application_Start are not supported in .NET 10. Migrate startup logic to Program.cs and Startup.cs using the ASP.NET Core middleware pipeline and IHostedService."
+    },
+    "UA-004": {
+      "label": "System.Configuration.ConfigurationManager not available",
+      "severity": "mandatory",
+      "effort": 5,
+      "description": "ConfigurationManager is not available in .NET 10 (System.Configuration.dll ships with .NET Framework only). Replace with Microsoft.Extensions.Configuration and appsettings.json or environment variables."
+    },
+    "UA-005": {
+      "label": "System.Web.Optimization (bundling) not supported",
+      "severity": "mandatory",
+      "effort": 3,
+      "description": "Microsoft.AspNet.Web.Optimization and BundleConfig are not available in .NET 10. Use libman, npm, or Webpack for client-side asset management in ASP.NET Core."
+    },
+    "UA-006": {
+      "label": "System.Messaging (MSMQ) not available in .NET 10",
+      "severity": "mandatory",
+      "effort": 13,
+      "description": "System.Messaging is a Windows-only .NET Framework assembly not included in .NET 10. Replace with Azure Service Bus, Azure Queue Storage, or the community package CoreWCF.Primitives for basic MSMQ migration."
+    },
+    "UA-007": {
+      "label": "Entity Framework Core 3.1 must be upgraded to EF Core 9+",
+      "severity": "mandatory",
+      "effort": 8,
+      "description": "EF Core 3.1 is end-of-life and incompatible with .NET 10. Upgrade to EF Core 9.0 or 10.0. Most DbContext and LINQ query code is compatible, but review deprecated APIs, migration tooling, and provider updates."
+    },
+    "UA-008": {
+      "label": "Legacy .csproj format (non-SDK style) must be converted",
+      "severity": "mandatory",
+      "effort": 5,
+      "description": "The project uses the legacy MSBuild project format with full Assembly/ProjectType GUIDs. Convert to SDK-style project format (.NET SDK .csproj) for .NET 10 compatibility. Use the sdk-style-conversion scenario."
+    },
+    "UA-009": {
+      "label": "Razor views need migration from MVC 5 Razor to ASP.NET Core Razor",
+      "severity": "potential",
+      "effort": 13,
+      "description": "Razor view syntax is mostly compatible, but MVC 5-specific helpers (@Html.Action, @Html.Partial, SelectList via ViewBag) may need updates. Tag Helpers replace many HTML helpers in ASP.NET Core."
+    },
+    "UA-010": {
+      "label": "packages.config must be migrated to PackageReference",
+      "severity": "potential",
+      "effort": 3,
+      "description": "The packages.config NuGet format is not supported in SDK-style projects. Migrate to PackageReference format. Many packages referenced (ASP.NET MVC, WebGrease, Antlr, WebPages) will be removed as they are replaced by ASP.NET Core packages."
+    },
+    "UA-011": {
+      "label": "Microsoft.Data.SqlClient upgrade required",
+      "severity": "potential",
+      "effort": 2,
+      "description": "Microsoft.Data.SqlClient 2.1.4 is outdated. Upgrade to the latest version (5.x) for .NET 10 compatibility and security patches."
+    },
+    "UA-012": {
+      "label": "Newtonsoft.Json can be replaced with System.Text.Json",
+      "severity": "optional",
+      "effort": 5,
+      "description": "Newtonsoft.Json 13.0.3 is still compatible with .NET 10 but System.Text.Json is the built-in, high-performance alternative. Consider migrating for reduced dependencies and improved performance."
+    }
+  },
+  "projects": [
+    {
+      "projectPath": "ContosoUniversity/ContosoUniversity.csproj",
+      "projectName": "ContosoUniversity",
+      "currentFramework": "net48",
+      "targetFramework": "net10.0",
+      "ruleInstances": [
+        {
+          "ruleId": "UA-001",
+          "location": { "path": "ContosoUniversity/Controllers/BaseController.cs", "line": 1 }
+        },
+        {
+          "ruleId": "UA-001",
+          "location": { "path": "ContosoUniversity/Controllers/StudentsController.cs", "line": 1 }
+        },
+        {
+          "ruleId": "UA-001",
+          "location": { "path": "ContosoUniversity/Controllers/CoursesController.cs", "line": 1 }
+        },
+        {
+          "ruleId": "UA-001",
+          "location": { "path": "ContosoUniversity/Controllers/DepartmentsController.cs", "line": 1 }
+        },
+        {
+          "ruleId": "UA-001",
+          "location": { "path": "ContosoUniversity/Controllers/InstructorsController.cs", "line": 1 }
+        },
+        {
+          "ruleId": "UA-001",
+          "location": { "path": "ContosoUniversity/Controllers/NotificationsController.cs", "line": 1 }
+        },
+        {
+          "ruleId": "UA-002",
+          "location": { "path": "ContosoUniversity/Controllers/CoursesController.cs", "line": 5 }
+        },
+        {
+          "ruleId": "UA-002",
+          "location": { "path": "ContosoUniversity/Controllers/StudentsController.cs", "line": 5 }
+        },
+        {
+          "ruleId": "UA-002",
+          "location": { "path": "ContosoUniversity/Global.asax.cs", "line": 2 }
+        },
+        {
+          "ruleId": "UA-003",
+          "location": { "path": "ContosoUniversity/Global.asax", "line": 1 }
+        },
+        {
+          "ruleId": "UA-003",
+          "location": { "path": "ContosoUniversity/Global.asax.cs", "line": 1 }
+        },
+        {
+          "ruleId": "UA-004",
+          "location": { "path": "ContosoUniversity/Data/SchoolContextFactory.cs", "line": 10 }
+        },
+        {
+          "ruleId": "UA-004",
+          "location": { "path": "ContosoUniversity/Global.asax.cs", "line": 26 }
+        },
+        {
+          "ruleId": "UA-004",
+          "location": { "path": "ContosoUniversity/Services/NotificationService.cs", "line": 14 }
+        },
+        {
+          "ruleId": "UA-005",
+          "location": { "path": "ContosoUniversity/App_Start/BundleConfig.cs", "line": 1 }
+        },
+        {
+          "ruleId": "UA-006",
+          "location": { "path": "ContosoUniversity/Services/NotificationService.cs", "line": 1 }
+        },
+        {
+          "ruleId": "UA-007",
+          "location": { "path": "ContosoUniversity/ContosoUniversity.csproj", "line": 1 }
+        },
+        {
+          "ruleId": "UA-008",
+          "location": { "path": "ContosoUniversity/ContosoUniversity.csproj", "line": 1 }
+        },
+        {
+          "ruleId": "UA-009",
+          "location": { "path": "ContosoUniversity/Views/Instructors/Index.cshtml", "line": 1 }
+        },
+        {
+          "ruleId": "UA-010",
+          "location": { "path": "ContosoUniversity/packages.config", "line": 1 }
+        },
+        {
+          "ruleId": "UA-011",
+          "location": { "path": "ContosoUniversity/packages.config", "line": 1 }
+        },
+        {
+          "ruleId": "UA-012",
+          "location": { "path": "ContosoUniversity/packages.config", "line": 1 }
+        }
+      ]
+    }
+  ]
+}
