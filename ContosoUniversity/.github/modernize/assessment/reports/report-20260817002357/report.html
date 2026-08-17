@@ -264,10 +264,10 @@ if (document.readyState === 'loading') {
   <label for="target-select">Target Compute Service:</label>
   <select id="target-select" onchange="onTargetChange(this.value)">
     <option value="AppService.Windows">Azure App Service</option>
-    <option value="AppService.Linux">Azure Kubernetes Service</option>
-    <option value="AKS.Linux">Azure Container Apps</option>
-    <option value="AKS.Windows">Azure App Service Container</option>
-    <option value="ACA">Azure App Service Managed Instance</option>
+    <option value="AppService.Linux">Azure App Service (Linux)</option>
+    <option value="AKS.Linux">Azure Kubernetes Service (Linux)</option>
+    <option value="AKS.Windows">Azure Kubernetes Service (Windows)</option>
+    <option value="ACA">Azure Container Apps</option>
   </select>
 </div>
 <div class="report-card">
@@ -325,7 +325,7 @@ if (document.readyState === 'loading') {
           </div>
           <div class="explanation-panel">
             <h4>Explanation</h4>
-            <div><p>Your app is using windows authentication which is not supported on Azure App Service, Azure Container Apps and Azure Kubernetes Service.</p><p>Azure App Service provides built-in authentication and authorization capabilities, so you can sign in users and access data by writing minimal or no code in your web app.</p><p>Follow the link below for more information.&quot;</p></div>
+            <div><p>Your app is using windows authentication which is not supported on Azure App Service, Azure Container Apps and Azure Kubernetes Service.</p><p>Azure App Service provides built-in authentication and authorization capabilities, so you can sign in users and access data by writing minimal or no code in your web app.</p><p>Follow the link below for more information.</p></div>
           </div>
         </div>
       </td>
